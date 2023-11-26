@@ -1,1 +1,0 @@
-export type SkillType = "Cooking" | "Firemaking" | "Leadership"

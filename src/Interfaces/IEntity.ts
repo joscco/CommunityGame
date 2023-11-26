@@ -1,4 +1,4 @@
-import {Town} from "../Town";
+import {Town} from "../objects/Town";
 import Transform = Phaser.GameObjects.Components.Transform;
 
 export interface IEntity extends Transform {

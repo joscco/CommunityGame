@@ -1,6 +1,6 @@
 import {IEntity} from "../../Interfaces/IEntity";
-import {Town} from "../../Town";
-import {Building} from "../../Building";
+import {Town} from "../Town";
+import {Building} from "../Building";
 import {Scene} from "phaser";
 
 export class CollectibleEntity extends Phaser.GameObjects.Image implements IEntity {

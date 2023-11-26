@@ -1,9 +1,9 @@
 import * as Phaser from 'phaser';
-import {Town} from "./Town";
-import {Person} from "./Person";
-import GameConfig = Phaser.Types.Core.GameConfig;
-import {BUILDINGS} from "./Building";
+import {Town} from "./objects/Town";
+import {Person} from "./objects/Person";
 import {Tent} from "./objects/collectibles/Tent";
+import {AddBuildingButton} from "./objects/AddBuildingButton";
+import GameConfig = Phaser.Types.Core.GameConfig;
 
 export class MainGameScene extends Phaser.Scene {
 
@@ -36,6 +36,7 @@ export class MainGameScene extends Phaser.Scene {
             for (let y = -4; y <= 4; y++) {
                 let field = this.add.image(GAME_WIDTH / 2 + 100 * x, GAME_HEIGHT / 2 + 75 * y, 'field')
                 field.alpha = 0
+                field.depth = 0
                 this.tweens.add({
                     targets: field,
                     alpha: 1,
@@ -65,6 +66,7 @@ export class MainGameScene extends Phaser.Scene {
 
         this.people.push(person)
         town.addEntity(person)
+
         this.tweens.add({
             targets: person,
             scale: 1,
@@ -73,15 +75,8 @@ export class MainGameScene extends Phaser.Scene {
             ease: Phaser.Math.Easing.Back.Out
         })
 
-        let random = new Phaser.Math.RandomDataGenerator()
 
-        let plusButton = this.add.image(50, GAME_HEIGHT / 2, 'plus')
-        plusButton.setInteractive()
-        plusButton.on("pointerup", () => {
-
-            let randomBuilding = random.pick(BUILDINGS)
-            town.addResource(randomBuilding)
-        })
+        let plusButton = new AddBuildingButton(this, 50, GAME_HEIGHT / 2, town)
     }
 
     update(time: number, delta: number) {
@@ -97,7 +92,7 @@ export const GAME_HEIGHT = 1080;
 const config: GameConfig = {
     type: Phaser.AUTO,
     mode: Phaser.Scale.NONE,
-    backgroundColor: '#FFFFFF',
+    transparent: true,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
     parent: 'game',
