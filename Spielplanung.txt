@@ -1,0 +1,37 @@
+Spiel:
+
+Ziel:
+
+Stadt aufbauen, neue Dinge entdecken, Konflikte lösen?
+
+
+Start: 
+
+Person im Wald. 
+
+Vorgehen:
+
+Baumaterial muss gesammelt werden. Jederzeit kann Baumaterial gegen ein Gebäude eingetauscht werden. Es gibt einen Katalog aller Gebäude, die man besitzt. Aus diesem heraus können Häuser platziert werden. Es gibt verschiedene Häuserklassen aus denen man wählen kann. Welches man kriegt ist Zufall.
+
+Jedes Haus generiert eine Menge Punkte oder befriedigt ein Bedürfnis.
+
+Gebäude müssen auf einem Gittersystem platziert werden.
+
+
+
+Kategorien von Häusern
+
+7 Ressourcen
+
+Resourcen:
+Material
+
+
+Bedürfnisse der Stadt:
+Wissen (Demut - Hochmut), (Schule, Uni)
+Gesundheit (Gemeinschaftlich - Gierig) (Krankenhaus, Park)
+Sex (Keuschheit - Wollust), (Puff)
+Nahrung (Mäßigung - Völlerei), (Restaurants)
+Freude (Geduldig - Zornig) (Freizeitparks, spielothek, Kneipe)
+Gemeinschaft (Wohlwollend - Neidend) (Wohnhaus, Plätze)
+Energie (Fleiss - Faulheit)

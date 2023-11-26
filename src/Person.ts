@@ -4,8 +4,10 @@ import {IEntity} from "./Interfaces/IEntity";
 import {Town} from "./Town";
 import {GAME_HEIGHT, GAME_WIDTH} from "./Game";
 
+const BORDER_OFFSET = 75;
 
 export class Person extends Phaser.GameObjects.Image implements IEntity {
+
 
     walking: boolean = false
     private walkTween: Phaser.Tweens.Tween;
@@ -20,8 +22,8 @@ export class Person extends Phaser.GameObjects.Image implements IEntity {
 
     walkSomewhere() {
         if (!this.walking) {
-            let randomNewX = Phaser.Math.Clamp(-150 + 300 * Math.random() + this.x, 0, GAME_WIDTH);
-            let randomNewY = Phaser.Math.Clamp(-150 + 300 * Math.random() + this.y, 0, GAME_HEIGHT);
+            let randomNewX = Phaser.Math.Clamp(-150 + 300 * Math.random() + this.x, BORDER_OFFSET, GAME_WIDTH - BORDER_OFFSET);
+            let randomNewY = Phaser.Math.Clamp(-150 + 300 * Math.random() + this.y, BORDER_OFFSET, GAME_HEIGHT - BORDER_OFFSET);
             let randomDelay = Math.random() * 10000;
             let distance = Phaser.Math.Distance.Between(this.x, this.y, randomNewX, randomNewY)
             this.move(randomNewX, randomNewY, distance * 20, randomDelay)
