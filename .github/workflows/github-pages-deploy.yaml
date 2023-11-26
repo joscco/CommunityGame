@@ -1,9 +1,11 @@
 name: Build and Deploy
 
 on:
+  workflow_dispatch:
+    branches: main
   push:
-    branches:
-      - main
+    branches: main
+
 jobs:
   build:
     runs-on: ubuntu-latest

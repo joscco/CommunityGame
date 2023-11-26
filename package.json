@@ -9,7 +9,10 @@
     "author": "Joscco",
     "license": "MIT",
     "devDependencies": {
+        "copy-webpack-plugin": "^11.0.0",
+        "css-loader": "^6.8.1",
         "expose-loader": "^4.1.0",
+        "html-webpack-plugin": "^5.5.3",
         "ts-loader": "^9.5.1",
         "typescript": "^5.0.3",
         "webpack": "^5.89.0",
