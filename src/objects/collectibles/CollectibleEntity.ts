@@ -1,13 +1,13 @@
 import {IEntity} from "../../Interfaces/IEntity";
 import {Town} from "../Town";
-import {Building} from "../Building";
+import {BuildingData} from "../BuildingData";
 import {Scene} from "phaser";
 
 export class CollectibleEntity extends Phaser.GameObjects.Image implements IEntity {
 
-    resource: Building
+    resource: BuildingData
 
-    constructor(scene: Scene, x: number, y: number, resource: Building) {
+    constructor(scene: Scene, x: number, y: number, resource: BuildingData) {
         super(scene, x, y, resource.textureName);
         this.scene.add.existing(this)
         this.depth = y

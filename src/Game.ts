@@ -4,10 +4,16 @@ import {Person} from "./objects/Person";
 import {Tent} from "./objects/collectibles/Tent";
 import {AddBuildingButton} from "./objects/AddBuildingButton";
 import GameConfig = Phaser.Types.Core.GameConfig;
+import {Building} from "./objects/Building";
+import Pointer = Phaser.Input.Pointer;
+import {Field} from "./objects/Field";
 
 export class MainGameScene extends Phaser.Scene {
 
     people: Person[] = []
+    fields: Field[] = []
+    draggedBuilding?: Building
+    dragging: boolean
 
     constructor() {
         super('main');
@@ -15,6 +21,7 @@ export class MainGameScene extends Phaser.Scene {
 
     preload() {
         this.load.image('field', 'assets/field.png');
+        this.load.image('field_inner', 'assets/fieldInner.png');
         this.load.image('person', 'assets/person.png');
 
         // plants
@@ -34,9 +41,10 @@ export class MainGameScene extends Phaser.Scene {
 
         for (let x = -6; x <= 6; x++) {
             for (let y = -4; y <= 4; y++) {
-                let field = this.add.image(GAME_WIDTH / 2 + 100 * x, GAME_HEIGHT / 2 + 75 * y, 'field')
+                let field = new Field(this, GAME_WIDTH / 2 + 100 * x, GAME_HEIGHT / 2 + 75 * y)
                 field.alpha = 0
                 field.depth = 0
+                this.fields.push(field)
                 this.tweens.add({
                     targets: field,
                     alpha: 1,
@@ -75,6 +83,26 @@ export class MainGameScene extends Phaser.Scene {
             ease: Phaser.Math.Easing.Back.Out
         })
 
+        this.input.on('pointermove', (pointer: Pointer) => {
+            if (this.dragging && this.draggedBuilding) {
+                this.draggedBuilding.x = pointer.x
+                this.draggedBuilding.y = pointer.y
+                this.fields.filter(field => Phaser.Math.Distance.Between(pointer.x, pointer.y, field.x, field.y) < 100)
+                    .forEach(field => field.blendInInner())
+                this.fields.filter(field => Phaser.Math.Distance.Between(pointer.x, pointer.y, field.x, field.y) >= 100)
+                    .forEach(field => field.blendOutInner())
+            }
+        })
+
+        this.input.on('pointerup', (pointer: Pointer) => {
+            if (this.dragging && this.draggedBuilding) {
+                this.draggedBuilding.destroy()
+
+            }
+            this.fields.forEach(field => field.blendOutInner())
+            this.dragging = false
+        })
+
 
         let plusButton = new AddBuildingButton(this, 50, GAME_HEIGHT / 2, town)
     }
@@ -84,6 +112,13 @@ export class MainGameScene extends Phaser.Scene {
             person.update()
         }
     }
+
+    dragBuilding(building: Building) {
+        this.draggedBuilding = building
+        this.dragging = true
+        building.depth = GAME_HEIGHT
+        this.children.bringToTop(building)
+    }
 }
 
 export const GAME_WIDTH = 1920;
@@ -91,13 +126,15 @@ export const GAME_HEIGHT = 1080;
 
 const config: GameConfig = {
     type: Phaser.AUTO,
-    mode: Phaser.Scale.NONE,
-    transparent: true,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
+    transparent: true,
     parent: 'game',
-    zoom: 1 / 2,
-    scene: MainGameScene
+    scale: {
+        mode: Phaser.Scale.NONE,
+        zoom: 1 / 2
+    },
+    scene: MainGameScene,
 };
 
 const game = new Phaser.Game(config);

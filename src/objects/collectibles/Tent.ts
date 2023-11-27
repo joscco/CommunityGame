@@ -1,5 +1,5 @@
 import {Scene} from 'phaser';
-import {TENT} from "../Building";
+import {TENT} from "../BuildingData";
 import {CollectibleEntity} from "./CollectibleEntity";
 
 export class Tent extends CollectibleEntity {

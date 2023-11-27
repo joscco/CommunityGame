@@ -1,19 +1,23 @@
 import Image = Phaser.GameObjects.Image;
 import Container = Phaser.GameObjects.Container;
 import Text = Phaser.GameObjects.Text;
-import {Scene} from "phaser";
+import {Game, Scene} from "phaser";
+import {BuildingData} from "./BuildingData";
+import {Town} from "./Town";
+import {GAME_HEIGHT, MainGameScene} from "../Game";
 import {Building} from "./Building";
+import Pointer = Phaser.Input.Pointer;
 
 export class BuildingDictionarySlot {
     container: Container
     slot: Image
     icon: Image
     shown: boolean
-    resource: Building
+    BuildingData: BuildingData
     numberText: Text
 
-    constructor(scene: Scene, x: number, y: number, resource: Building) {
-        this.resource = resource
+    constructor(scene: MainGameScene, x: number, y: number, resource: BuildingData) {
+        this.BuildingData = resource
         this.slot = scene.add.image(0, 0, 'inventory/slot')
         this.icon = scene.add.image(0, 20, resource.textureName)
         this.icon.setOrigin(0.5, 1)
@@ -24,6 +28,12 @@ export class BuildingDictionarySlot {
         })
         this.container = scene.add.container(x, y, [this.slot, this.icon, this.numberText])
         this.container.setScale(0, 0)
+
+        this.slot.setInteractive()
+        this.slot.on("pointerdown", (pointer: Pointer) => {
+            let building = new Building(scene, pointer.x, pointer.y, this.BuildingData)
+            scene.dragBuilding(building)
+        })
 
         this.shown = false
     }

@@ -1,14 +1,14 @@
 import Container = Phaser.GameObjects.Container;
 import {BuildingDictionarySlot} from "./BuildingDictionarySlot";
 import {Scene} from "phaser";
-import {GAME_HEIGHT, GAME_WIDTH} from "../Game";
-import {Building} from "./Building";
+import {GAME_HEIGHT, GAME_WIDTH, MainGameScene} from "../Game";
+import {BuildingData} from "./BuildingData";
 
 export class BuildingDictionary {
     container: Container
     slots: BuildingDictionarySlot[] = []
 
-    constructor(scene: Scene, resources: Building[]) {
+    constructor(scene: MainGameScene, resources: BuildingData[]) {
         let maxNumberOfSlots = resources.length
 
         for (let i = 0; i < maxNumberOfSlots; i++) {
@@ -20,9 +20,9 @@ export class BuildingDictionary {
         this.container.depth = GAME_HEIGHT
     }
 
-    updateResources(resources: Map<Building, number>) {
+    updateResources(resources: Map<BuildingData, number>) {
         this.slots.forEach(slot => {
-            let value = resources.get(slot.resource) ?? 0
+            let value = resources.get(slot.BuildingData) ?? 0
             if (slot.shown) {
                 if (value <= 0) {
                     slot.blendOut()

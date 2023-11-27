@@ -1,5 +1,5 @@
 import {Scene} from "phaser";
-import {BUILDINGS} from "./Building";
+import {BUILDINGS} from "./BuildingData";
 import {Town} from "./Town";
 
 export class AddBuildingButton extends Phaser.GameObjects.Image {
@@ -22,7 +22,7 @@ export class AddBuildingButton extends Phaser.GameObjects.Image {
             targets: this,
             tweens: [
                 {
-                    scale: 1.1,
+                    scale: 0.95,
                     duration: 200,
                     ease: Phaser.Math.Easing.Back.Out,
                     onStart: () => this.disableInteractive()

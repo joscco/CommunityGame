@@ -2,17 +2,18 @@ import Vector2Like = Phaser.Types.Math.Vector2Like;
 import GameObject = Phaser.GameObjects.GameObject;
 import Pointer = Phaser.Input.Pointer;
 import {Scene} from "phaser";
-import {Building, BUILDINGS} from "./Building";
+import {BuildingData, BUILDINGS} from "./BuildingData";
 import {IEntity} from "../Interfaces/IEntity";
 import {BuildingDictionary} from "./BuildingDictionary";
+import {MainGameScene} from "../Game";
 
 export class Town {
 
     entities: Map<Vector2Like, GameObject> = new Map([])
-    resources: Map<Building, number> = new Map([])
+    resources: Map<BuildingData, number> = new Map([])
     resourceDictionary: BuildingDictionary
 
-    constructor(scene: Scene) {
+    constructor(scene: MainGameScene) {
         this.resourceDictionary = new BuildingDictionary(scene, BUILDINGS)
     }
 
@@ -34,7 +35,7 @@ export class Town {
         }
     }
 
-    addResource(resource: Building) {
+    addResource(resource: BuildingData) {
         let currentValue = this.resources.get(resource) ?? 0
         this.resources.set(resource, currentValue + 1)
         this.resourceDictionary.updateResources(this.resources)

@@ -1,6 +1,6 @@
 import {Scene} from 'phaser';
 import {CollectibleEntity} from "./CollectibleEntity";
-import {PINE} from "../Building";
+import {PINE} from "../BuildingData";
 
 export class Pine extends CollectibleEntity {
 
