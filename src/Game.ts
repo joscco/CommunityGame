@@ -1,19 +1,17 @@
 import * as Phaser from 'phaser';
 import {Town} from "./objects/Town";
 import {Person} from "./objects/Person";
-import {Tent} from "./objects/collectibles/Tent";
 import {AddBuildingButton} from "./objects/AddBuildingButton";
-import GameConfig = Phaser.Types.Core.GameConfig;
 import {Building} from "./objects/Building";
-import Pointer = Phaser.Input.Pointer;
-import {Field} from "./objects/Field";
+import {TENT} from "./objects/BuildingData";
+import GameConfig = Phaser.Types.Core.GameConfig;
 
 export class MainGameScene extends Phaser.Scene {
 
     people: Person[] = []
-    fields: Field[] = []
     draggedBuilding?: Building
     dragging: boolean
+    town: Town;
 
     constructor() {
         super('main');
@@ -22,6 +20,7 @@ export class MainGameScene extends Phaser.Scene {
     preload() {
         this.load.image('field', 'assets/field.png');
         this.load.image('field_inner', 'assets/fieldInner.png');
+        this.load.image('field_inner_canceled', 'assets/fieldInnerCanceled.png');
         this.load.image('person', 'assets/person.png');
 
         // plants
@@ -37,28 +36,13 @@ export class MainGameScene extends Phaser.Scene {
     }
 
     create() {
-        let town = new Town(this)
-
-        for (let x = -6; x <= 6; x++) {
-            for (let y = -4; y <= 4; y++) {
-                let field = new Field(this, GAME_WIDTH / 2 + 100 * x, GAME_HEIGHT / 2 + 75 * y)
-                field.alpha = 0
-                field.depth = 0
-                this.fields.push(field)
-                this.tweens.add({
-                    targets: field,
-                    alpha: 1,
-                    delay: (Math.abs(x) + Math.abs(y)) * 200,
-                    duration: 300,
-                    ease: Phaser.Math.Easing.Quadratic.InOut
-                })
-            }
-        }
+        this.town = new Town(this, 9, 13)
 
         // Add tent
-        let tent = new Tent(this, GAME_WIDTH/2, GAME_HEIGHT/2)
+        let tent = new Building(this, GAME_WIDTH / 2, GAME_HEIGHT / 2, TENT)
         tent.scale = 0
-        tent.depth = GAME_HEIGHT / 2 + 30
+        this.town.setBuildingAt([{x: 6, y: 4}], tent)
+
         this.tweens.add({
             targets: tent,
             scale: 1,
@@ -67,44 +51,23 @@ export class MainGameScene extends Phaser.Scene {
             ease: Phaser.Math.Easing.Back.Out
         })
 
-
         // Add person
-        let person = new Person(this, GAME_WIDTH / 2, GAME_HEIGHT / 2)
-        person.scale = 0
+        for (let i = 0; i < 15; i++) {
+            let person = new Person(this, GAME_WIDTH / 2, GAME_HEIGHT / 2)
+            person.scale = 0
+            this.people.push(person)
 
-        this.people.push(person)
-        town.addEntity(person)
-
-        this.tweens.add({
-            targets: person,
-            scale: 1,
-            delay: 1500,
-            duration: 300,
-            ease: Phaser.Math.Easing.Back.Out
-        })
-
-        this.input.on('pointermove', (pointer: Pointer) => {
-            if (this.dragging && this.draggedBuilding) {
-                this.draggedBuilding.x = pointer.x
-                this.draggedBuilding.y = pointer.y
-                this.fields.filter(field => Phaser.Math.Distance.Between(pointer.x, pointer.y, field.x, field.y) < 100)
-                    .forEach(field => field.blendInInner())
-                this.fields.filter(field => Phaser.Math.Distance.Between(pointer.x, pointer.y, field.x, field.y) >= 100)
-                    .forEach(field => field.blendOutInner())
-            }
-        })
-
-        this.input.on('pointerup', (pointer: Pointer) => {
-            if (this.dragging && this.draggedBuilding) {
-                this.draggedBuilding.destroy()
-
-            }
-            this.fields.forEach(field => field.blendOutInner())
-            this.dragging = false
-        })
+            this.tweens.add({
+                targets: person,
+                scale: 1,
+                delay: 1500,
+                duration: 300,
+                ease: Phaser.Math.Easing.Back.Out
+            })
+        }
 
 
-        let plusButton = new AddBuildingButton(this, 50, GAME_HEIGHT / 2, town)
+        let plusButton = new AddBuildingButton(this, 50, GAME_HEIGHT / 2, this.town)
     }
 
     update(time: number, delta: number) {
@@ -119,6 +82,8 @@ export class MainGameScene extends Phaser.Scene {
         building.depth = GAME_HEIGHT
         this.children.bringToTop(building)
     }
+
+
 }
 
 export const GAME_WIDTH = 1920;

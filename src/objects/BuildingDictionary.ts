@@ -1,6 +1,5 @@
 import Container = Phaser.GameObjects.Container;
 import {BuildingDictionarySlot} from "./BuildingDictionarySlot";
-import {Scene} from "phaser";
 import {GAME_HEIGHT, GAME_WIDTH, MainGameScene} from "../Game";
 import {BuildingData} from "./BuildingData";
 
@@ -22,7 +21,7 @@ export class BuildingDictionary {
 
     updateResources(resources: Map<BuildingData, number>) {
         this.slots.forEach(slot => {
-            let value = resources.get(slot.BuildingData) ?? 0
+            let value = resources.get(slot.buildingData) ?? 0
             if (slot.shown) {
                 if (value <= 0) {
                     slot.blendOut()

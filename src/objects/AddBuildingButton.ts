@@ -13,7 +13,7 @@ export class AddBuildingButton extends Phaser.GameObjects.Image {
         this.on("pointerup", () => {
             let randomBuilding = random.pick(BUILDINGS)
             this.scaleUpThenDown()
-            town.addResource(randomBuilding)
+            town.addToInventory(randomBuilding)
         })
     }
 

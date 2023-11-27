@@ -20,13 +20,22 @@ export const HOUSE_1: BuildingData = {
     chance: 5,
     textureName: 'buildings/house_1',
     rows: 1,
-    columns: 2,
+    columns: 1,
     communityPlus: 3
 }
 export const HOUSE_2: BuildingData = {
     costInStars: 2,
     chance: 5,
     textureName: 'buildings/house_2',
+    rows: 2,
+    columns: 1,
+    communityPlus: 7
+}
+
+export const HOUSE_3: BuildingData = {
+    costInStars: 2,
+    chance: 5,
+    textureName: 'buildings/house_3',
     rows: 3,
     columns: 1,
     communityPlus: 7
@@ -53,5 +62,6 @@ export const BUILDINGS: BuildingData[] = [
     TENT,
     PINE,
     HOUSE_1,
-    HOUSE_2
+    HOUSE_2,
+    HOUSE_3
 ]

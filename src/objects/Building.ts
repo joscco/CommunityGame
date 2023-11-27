@@ -1,11 +1,31 @@
-import {Scene} from "phaser";
 import {BuildingData} from "./BuildingData";
+import {MainGameScene} from "../Game";
 import Image = Phaser.GameObjects.Image;
 
 export class Building extends Image {
-    constructor(scene: Scene, x: number, y: number, buildingData: BuildingData) {
+
+    buildingData: BuildingData
+
+    constructor(scene: MainGameScene, x: number, y: number, buildingData: BuildingData) {
         super(scene, x, y, buildingData.textureName)
         scene.add.existing(this)
-        this.setInteractive({draggable: true})
+        this.buildingData = buildingData
+        this.setInteractive()
+
+        this.on("pointerdown", () => {
+            scene.dragBuilding(this)
+            scene.town.removeBuilding(this)
+        })
+    }
+
+    moveTo(x: number, y: number) {
+        this.scene.tweens.add({
+            targets: this,
+            x: x,
+            y: y,
+            duration: 200,
+            ease: Phaser.Math.Easing.Back.Out,
+            onUpdate: () => this.depth = this.y + this.height/2
+        })
     }
 }
