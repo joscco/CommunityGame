@@ -5,6 +5,7 @@ import {AddBuildingButton} from "./objects/AddBuildingButton";
 import {Building} from "./objects/Building";
 import {TENT} from "./objects/BuildingData";
 import GameConfig = Phaser.Types.Core.GameConfig;
+import Center = Phaser.Scale.Center;
 
 export class MainGameScene extends Phaser.Scene {
 
@@ -90,13 +91,21 @@ export const GAME_HEIGHT = 1080;
 
 const config: GameConfig = {
     type: Phaser.AUTO,
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
     transparent: true,
     parent: 'game',
     scale: {
-        mode: Phaser.Scale.NONE,
-        zoom: 1 / 2
+        mode: Phaser.Scale.FIT,
+        width: GAME_WIDTH,
+        height: GAME_HEIGHT,
+        autoCenter: Center.CENTER_BOTH,
+        min: {
+            width: GAME_WIDTH/2,
+            height: GAME_HEIGHT/2
+        },
+        max: {
+            width: GAME_WIDTH,
+            height: GAME_HEIGHT
+        }
     },
     scene: MainGameScene,
 };
