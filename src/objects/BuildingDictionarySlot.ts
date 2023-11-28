@@ -5,6 +5,7 @@ import Pointer = Phaser.Input.Pointer;
 import {BuildingData} from "./BuildingData";
 import {MainGameScene} from "../Game";
 import {Building} from "./Building";
+import Tween = Phaser.Tweens.Tween;
 
 export class BuildingDictionarySlot {
     container: Container
@@ -13,6 +14,7 @@ export class BuildingDictionarySlot {
     shown: boolean
     buildingData: BuildingData
     numberText: Text
+    private scaleTween: Tween;
 
     constructor(scene: MainGameScene, x: number, y: number, resource: BuildingData) {
         this.buildingData = resource
@@ -47,15 +49,14 @@ export class BuildingDictionarySlot {
     }
 
     private tweenScaleTo(scale: number, duration: number, shownAfter: boolean) {
-        this.container.scene.tweens.add({
+        this.scaleTween?.remove()
+        this.shown = shownAfter
+        this.scaleTween = this.container.scene.tweens.add({
             targets: this.container,
             scaleX: scale,
             scaleY: scale,
             ease: Phaser.Math.Easing.Quadratic.InOut,
-            duration: duration,
-            onComplete: () => {
-                this.shown = shownAfter
-            }
+            duration: duration
         })
     }
 

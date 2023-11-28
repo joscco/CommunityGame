@@ -66,7 +66,6 @@ export class MainGameScene extends Phaser.Scene {
             })
         }
 
-
         let plusButton = new AddBuildingButton(this, 50, GAME_HEIGHT / 2, this.town)
     }
 

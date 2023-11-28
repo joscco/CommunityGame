@@ -11,6 +11,8 @@ export class Building extends Image {
         scene.add.existing(this)
         this.buildingData = buildingData
         this.setInteractive()
+        this.scale = 0
+        this.blendIn()
 
         this.on("pointerdown", () => {
             scene.dragBuilding(this)
@@ -26,6 +28,25 @@ export class Building extends Image {
             duration: 200,
             ease: Phaser.Math.Easing.Back.Out,
             onUpdate: () => this.depth = this.y + this.height/2
+        })
+    }
+
+    blendIn() {
+        this.scene.tweens.add({
+            targets: this,
+            scale:1,
+            duration: 200,
+            ease: Phaser.Math.Easing.Back.Out
+        })
+    }
+
+    blendOutThenDestroy() {
+        this.scene.tweens.add({
+            targets: this,
+            scale: 0,
+            duration: 200,
+            ease: Phaser.Math.Easing.Back.In,
+            onComplete: () => this.destroy()
         })
     }
 }

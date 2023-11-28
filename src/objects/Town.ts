@@ -30,31 +30,39 @@ export class Town {
         this.fields = this.initFields(rows, columns)
 
         this.scene.input.on('pointermove', (pointer: Pointer) => {
-            let draggedBuilding = this.scene.draggedBuilding
-            if (this.scene.dragging && draggedBuilding) {
-                draggedBuilding.x = pointer.x
-                draggedBuilding.y = pointer.y
-                let buildingData = draggedBuilding.buildingData
-                this.markFieldsClosestTo(buildingData.rows, buildingData.columns, pointer)
-            }
+            this.dragBuildingToPointer(pointer);
         })
 
         this.scene.input.on('pointerup', (pointer: Pointer) => {
-            if (this.scene.dragging && this.scene.draggedBuilding) {
-                let draggedBuilding = this.scene.draggedBuilding
-                let [rows, columns] = [draggedBuilding.buildingData.rows, draggedBuilding.buildingData.columns]
-                let closestIndices = this.getClosestIndicesTo(rows, columns, pointer)
-
-                if (closestIndices.length === rows * columns && this.areFree(closestIndices)) {
-                    this.setBuildingAt(closestIndices, draggedBuilding)
-                } else {
-                    this.addToInventory(this.scene.draggedBuilding.buildingData)
-                    this.scene.draggedBuilding.destroy()
-                }
-            }
-            this.fields.forEach(field => field.blendOutInner())
-            this.scene.dragging = false
+            this.releaseDraggedBuilding(pointer);
         })
+    }
+
+    private releaseDraggedBuilding(pointer: Phaser.Input.Pointer) {
+        let draggedBuilding = this.scene.draggedBuilding
+        if (this.scene.dragging && draggedBuilding) {
+            let [rows, columns] = [draggedBuilding.buildingData.rows, draggedBuilding.buildingData.columns]
+            let closestIndices = this.getClosestIndicesTo(rows, columns, pointer)
+
+            if (closestIndices.length === rows * columns && this.areFree(closestIndices)) {
+                this.setBuildingAt(closestIndices, draggedBuilding)
+            } else {
+                this.addToInventory(this.scene.draggedBuilding.buildingData)
+                this.scene.draggedBuilding.blendOutThenDestroy();
+            }
+        }
+        this.fields.forEach(field => field.blendOutInner())
+        this.scene.dragging = false
+    }
+
+    private dragBuildingToPointer(pointer: Phaser.Input.Pointer) {
+        let draggedBuilding = this.scene.draggedBuilding
+        if (this.scene.dragging && draggedBuilding) {
+            draggedBuilding.x = pointer.x
+            draggedBuilding.y = pointer.y
+            let buildingData = draggedBuilding.buildingData
+            this.markFieldsClosestTo(buildingData.rows, buildingData.columns, pointer)
+        }
     }
 
     private areFree(indices: Vector2Like[]): boolean {
