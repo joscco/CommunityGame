@@ -25,7 +25,8 @@ export class BuildingDictionarySlot {
         this.costText = scene.add.text(-30, 15, "0", {
             fontSize: 30,
             color: '000',
-            align: "center"
+            align: "center",
+            fontFamily: "Londrina"
         })
         this.starIcon = scene.add.image(15, 25, 'star')
         this.container = scene.add.container(x, y, [this.slot, this.icon, this.costText, this.starIcon])

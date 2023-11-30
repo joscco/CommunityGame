@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import {Town} from "./objects/Town";
 import {Person} from "./objects/Person";
 import {Building} from "./objects/Building";
-import {BUILDINGS, PINE, TENT} from "./objects/BuildingData";
+import {BUILDINGS, TENT} from "./objects/BuildingData";
 import GameConfig = Phaser.Types.Core.GameConfig;
 import Center = Phaser.Scale.Center;
 
@@ -18,23 +18,23 @@ export class MainGameScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('field', 'assets/field.png');
-        this.load.image('field_inner', 'assets/fieldInner.png');
-        this.load.image('field_inner_canceled', 'assets/fieldInnerCanceled.png');
-        this.load.image('person', 'assets/person.png');
+        this.load.image('field', 'assets/images/field.png');
+        this.load.image('field_inner', 'assets/images/fieldInner.png');
+        this.load.image('field_inner_canceled', 'assets/images/fieldInnerCanceled.png');
+        this.load.image('person', 'assets/images/person.png');
 
         // plants
-        this.load.image('buildings/tent', 'assets/tent.png');
-        this.load.image('buildings/big_tent', 'assets/big_tent.png');
-        this.load.image('buildings/fire', 'assets/fire.png');
-        this.load.image('buildings/hut', 'assets/hut.png');
-        this.load.image('buildings/pine', 'assets/pine.png');
-        this.load.image('buildings/house', 'assets/house.png');
-        this.load.image('buildings/tall_house', 'assets/tall_house.png');
+        this.load.image('buildings/tent', 'assets/images/tent.png');
+        this.load.image('buildings/big_tent', 'assets/images/big_tent.png');
+        this.load.image('buildings/fire', 'assets/images/fire.png');
+        this.load.image('buildings/hut', 'assets/images/hut.png');
+        this.load.image('buildings/pine', 'assets/images/pine.png');
+        this.load.image('buildings/house', 'assets/images/house.png');
+        this.load.image('buildings/tall_house', 'assets/images/tall_house.png');
 
         // UI
-        this.load.image('star', 'assets/star.png');
-        this.load.image('inventory/slot', 'assets/inventory_slot.png');
+        this.load.image('star', 'assets/images/star.png');
+        this.load.image('inventory/slot', 'assets/images/inventory_slot.png');
     }
 
     create() {
