@@ -16,7 +16,7 @@ export type BuildingData = {
     energyPlus?: number,
 }
 
-export type BuildingName = 'tent' | 'big_tent' | 'fire' | 'hut' | 'tree' | 'house' | 'tall_house'
+export type BuildingName = 'tent' | 'big_tent' | 'fire' | 'hut' | 'tree' | 'house' | 'tall_house' | 'court'
 
 export const TENT: BuildingData = {
     costInStars: 1,
@@ -85,6 +85,16 @@ export const LARGE_HOUSE: BuildingData = {
     communityPlus: 7
 }
 
+export const COURT: BuildingData = {
+    costInStars: 5,
+    name: 'court',
+    recipe: ['fire', 'big_tent'],
+    textureName: 'buildings/court',
+    rows: 2,
+    columns: 2,
+    communityPlus: 10
+}
+
 export const BUILDINGS: BuildingData[] = [
     TENT,
     PINE,
@@ -92,5 +102,6 @@ export const BUILDINGS: BuildingData[] = [
     HUT,
     FIRE,
     HOUSE,
-    LARGE_HOUSE
+    LARGE_HOUSE,
+    COURT
 ]

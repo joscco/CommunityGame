@@ -10,18 +10,19 @@ import Tween = Phaser.Tweens.Tween;
 export class BuildingDictionarySlot {
     container: Container
     slot: Image
-    icon: Image
+    buildingImage: Image
     shown: boolean
     buildingData: BuildingData
     costText: Text
     starIcon: Image
     private scaleTween: Tween;
 
-    constructor(scene: MainGameScene, x: number, y: number, resource: BuildingData) {
-        this.buildingData = resource
-        this.slot = scene.add.image(0, 0, 'inventory/slot')
-        this.icon = scene.add.image(0, 0, resource.textureName)
-        this.icon.setOrigin(0.5, 1)
+    constructor(scene: MainGameScene, x: number, y: number) {
+
+        this.slot = scene.add.image(x, y, 'inventory/slot')
+        this.buildingImage = scene.add.image(0, 0, undefined)
+        this.buildingImage.setOrigin(0.5, 1)
+        this.buildingImage.scale = 0.8
         this.costText = scene.add.text(-30, 15, "0", {
             fontSize: 30,
             color: '000',
@@ -29,16 +30,29 @@ export class BuildingDictionarySlot {
             fontFamily: "Londrina"
         })
         this.starIcon = scene.add.image(15, 25, 'star')
-        this.container = scene.add.container(x, y, [this.slot, this.icon, this.costText, this.starIcon])
+        this.container = scene.add.container(x, y, [this.buildingImage, this.costText, this.starIcon])
         this.container.setScale(0, 0)
 
         this.slot.setInteractive()
-        this.slot.on("pointerdown", (pointer: Pointer) => {
-            let building = new Building(scene, pointer.x, pointer.y, this.buildingData)
-            scene.dragBuilding(building)
-        })
+        this.buildingImage.setInteractive()
+        this.buildingImage.on("pointerdown", (pointer: Pointer) =>
+            this.addNewBuildingAndDrag(scene, pointer))
+        this.slot.on("pointerdown", (pointer: Pointer) =>
+            this.addNewBuildingAndDrag(scene, pointer))
 
         this.shown = false
+    }
+
+    setBuildingData(buildingData: BuildingData) {
+        this.buildingData = buildingData
+        this.buildingImage.setTexture(buildingData.textureName)
+    }
+
+    private addNewBuildingAndDrag(scene: MainGameScene, pointer: Phaser.Input.Pointer) {
+        if (this.shown) {
+            let building = new Building(scene, pointer.x, pointer.y, this.buildingData)
+            scene.dragBuilding(building)
+        }
     }
 
     blendIn() {

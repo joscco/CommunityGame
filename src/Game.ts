@@ -31,6 +31,7 @@ export class MainGameScene extends Phaser.Scene {
         this.load.image('buildings/pine', 'assets/images/pine.png');
         this.load.image('buildings/house', 'assets/images/house.png');
         this.load.image('buildings/tall_house', 'assets/images/tall_house.png');
+        this.load.image('buildings/court', 'assets/images/court.png');
 
         // UI
         this.load.image('star', 'assets/images/star.png');
