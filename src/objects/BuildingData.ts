@@ -46,7 +46,7 @@ export const BIG_TENT: BuildingData = {
 }
 
 export const HUT: BuildingData = {
-    costInStars: 1,
+    costInStars: 3,
     name: 'hut',
     recipe: ['fire', 'tent'],
     textureName: 'buildings/hut',
@@ -66,7 +66,7 @@ export const FIRE: BuildingData = {
 }
 
 export const HOUSE: BuildingData = {
-    costInStars: 2,
+    costInStars: 4,
     name: 'house',
     recipe: ['hut', 'hut'],
     textureName: 'buildings/house',
@@ -76,7 +76,7 @@ export const HOUSE: BuildingData = {
 }
 
 export const LARGE_HOUSE: BuildingData = {
-    costInStars: 2,
+    costInStars: 5,
     name: 'tall_house',
     recipe: ['house', 'house'],
     textureName: 'buildings/tall_house',

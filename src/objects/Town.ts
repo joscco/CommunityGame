@@ -118,7 +118,7 @@ export class Town {
         this.fieldAreaWidth = columns * FIELD_WIDTH
         this.fieldAreaHeight = rows * FIELD_HEIGHT
         this.offsetFirstX = (GAME_WIDTH - this.fieldAreaWidth) / 2 + FIELD_WIDTH / 2
-        this.offsetFirstY = (GAME_HEIGHT - this.fieldAreaHeight) / 2 + FIELD_HEIGHT / 2
+        this.offsetFirstY = (GAME_HEIGHT - this.fieldAreaHeight) / 2 + FIELD_HEIGHT / 2 - 130
 
         let fields = new Map<Vector2Like, Field>();
         for (let x = 0; x < columns; x++) {
@@ -180,7 +180,6 @@ export class Town {
             }
         }
 
-
         unlockedRecipes.forEach(data => this.addToCatalogue(data))
     }
 
@@ -191,9 +190,15 @@ export class Town {
 
     private getNeighborNamesForIndex(index: Phaser.Types.Math.Vector2Like): BuildingName[] {
         // Adapt this to buildings that take up more than one field!
-        let neighborIndices = [{x: index.x, y: index.y - 1}, {x: index.x, y: index.y + 1}, {x: index.x - 1, y: index.y}, {x: index.x + 1, y: index.y}]
+        let neighborIndices = [
+            {x: index.x, y: index.y - 1},
+            {x: index.x, y: index.y + 1},
+            {x: index.x - 1, y: index.y},
+            {x: index.x + 1, y: index.y}
+        ]
+        let entity = this.entities.get(index)
         return neighborIndices.map(index => this.entities.get(index))
-            .filter(entity => entity)
+            .filter(neighbor => neighbor && neighbor !== entity)
             .map(entity => entity.getName())
     }
 }
