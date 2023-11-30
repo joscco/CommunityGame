@@ -10,14 +10,16 @@ export class Building extends Image {
         super(scene, x, y, buildingData.textureName)
         scene.add.existing(this)
         this.buildingData = buildingData
-        this.setInteractive()
         this.scale = 0
         this.blendIn()
 
-        this.on("pointerdown", () => {
-            scene.dragBuilding(this)
-            scene.town.removeBuilding(this)
-        })
+        // Show tear down button here instead
+        //this.setInteractive()
+
+        // this.on("pointerdown", () => {
+        //     scene.dragBuilding(this)
+        //     scene.town.removeBuilding(this)
+        // })
     }
 
     moveTo(x: number, y: number) {
@@ -48,5 +50,9 @@ export class Building extends Image {
             ease: Phaser.Math.Easing.Back.In,
             onComplete: () => this.destroy()
         })
+    }
+
+    getName() {
+        return this.buildingData.name
     }
 }

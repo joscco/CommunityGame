@@ -1,7 +1,6 @@
 import Vector2Like = Phaser.Types.Math.Vector2Like;
-import GameObject = Phaser.GameObjects.GameObject;
 import Pointer = Phaser.Input.Pointer;
-import {BuildingData, BUILDINGS} from "./BuildingData";
+import {BuildingData, BuildingName, BUILDINGS} from "./BuildingData";
 import {BuildingDictionary} from "./BuildingDictionary";
 import {GAME_HEIGHT, GAME_WIDTH, MainGameScene} from "../Game";
 import {Field, FIELD_HEIGHT, FIELD_WIDTH} from "./Field";
@@ -10,10 +9,14 @@ import {Vector2Dict} from "../general/Dict";
 
 export class Town {
 
+    level: number;
+    power: number;
+    people: number;
+
     scene: MainGameScene
-    entities: Vector2Dict<GameObject> = new Vector2Dict()
-    inventory: Map<BuildingData, number> = new Map([])
-    resourceDictionary: BuildingDictionary
+    entities: Vector2Dict<Building> = new Vector2Dict()
+    catalogue: Map<BuildingData, boolean> = new Map([])
+    buildingDictionary: BuildingDictionary
     fields: Map<Vector2Like, Field>
 
     private fieldAreaWidth: number;
@@ -25,7 +28,7 @@ export class Town {
 
     constructor(scene: MainGameScene, rows: number, columns: number) {
         this.scene = scene
-        this.resourceDictionary = new BuildingDictionary(scene, BUILDINGS)
+        this.buildingDictionary = new BuildingDictionary(scene, BUILDINGS)
 
         this.fields = this.initFields(rows, columns)
 
@@ -47,7 +50,7 @@ export class Town {
             if (closestIndices.length === rows * columns && this.areFree(closestIndices)) {
                 this.setBuildingAt(closestIndices, draggedBuilding)
             } else {
-                this.addToInventory(this.scene.draggedBuilding.buildingData)
+                this.addToCatalogue(this.scene.draggedBuilding.buildingData)
                 this.scene.draggedBuilding.blendOutThenDestroy();
             }
         }
@@ -100,18 +103,13 @@ export class Town {
         indices.forEach(index => this.entities.set(index, building))
         let [x, y] = [center[0] / indexLength, center[1] / indexLength]
         building.moveTo(x, y)
+
+        this.checkRecipes()
     }
 
-    addToInventory(buildingData: BuildingData) {
-        let currentValue = this.inventory.get(buildingData) ?? 0
-        this.inventory.set(buildingData, currentValue + 1)
-        this.resourceDictionary.updateResources(this.inventory)
-    }
-
-    removeFromInventory(buildingData: BuildingData) {
-        let currentValue = this.inventory.get(buildingData) ?? 1
-        this.inventory.set(buildingData, currentValue - 1)
-        this.resourceDictionary.updateResources(this.inventory)
+    addToCatalogue(buildingData: BuildingData) {
+        this.catalogue.set(buildingData, true)
+        this.buildingDictionary.updateResources(this.catalogue)
     }
 
     private initFields(rows: number, columns: number): Map<Vector2Like, Field> {
@@ -165,4 +163,37 @@ export class Town {
     }
 
 
+    private checkRecipes() {
+        let openRecipes = new Map<BuildingData, BuildingName[]>
+
+        for (let [data, existent] of this.catalogue.entries()) {
+            if (!existent && data.recipe) {
+                openRecipes.set(data, data.recipe)
+            }
+        }
+
+        let unlockedRecipes: BuildingData[] = []
+
+        for (let [data, needed] of openRecipes) {
+            if (this.hasNeighbors(needed[0], needed[1])) {
+                unlockedRecipes.push(data)
+            }
+        }
+
+
+        unlockedRecipes.forEach(data => this.addToCatalogue(data))
+    }
+
+    private hasNeighbors(first: BuildingName, second: BuildingName) {
+        return this.entities.getEntriesWith((k, v) => v.getName() === first)
+            .some(([index, data]) => this.getNeighborNamesForIndex(index).includes(second))
+    }
+
+    private getNeighborNamesForIndex(index: Phaser.Types.Math.Vector2Like): BuildingName[] {
+        // Adapt this to buildings that take up more than one field!
+        let neighborIndices = [{x: index.x, y: index.y - 1}, {x: index.x, y: index.y + 1}, {x: index.x - 1, y: index.y}, {x: index.x + 1, y: index.y}]
+        return neighborIndices.map(index => this.entities.get(index))
+            .filter(entity => entity)
+            .map(entity => entity.getName())
+    }
 }

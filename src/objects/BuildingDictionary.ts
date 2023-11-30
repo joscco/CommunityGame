@@ -19,17 +19,12 @@ export class BuildingDictionary {
         this.container.depth = GAME_HEIGHT
     }
 
-    updateResources(resources: Map<BuildingData, number>) {
+    updateResources(resources: Map<BuildingData, boolean>) {
         this.slots.forEach(slot => {
-            let value = resources.get(slot.buildingData) ?? 0
-            if (slot.shown) {
-                if (value <= 0) {
-                    slot.blendOut()
-                } else {
-                    slot.updateNumber(value)
-                }
-            } else if (!slot.shown && value > 0) {
-                slot.updateNumber(value)
+            let buildingData = slot.buildingData
+            let value = resources.get(buildingData) ?? false
+            if (!slot.shown && value) {
+                slot.updateNumber(buildingData.costInStars)
                 slot.blendIn()
             }
         })

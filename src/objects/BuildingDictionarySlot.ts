@@ -13,35 +13,31 @@ export class BuildingDictionarySlot {
     icon: Image
     shown: boolean
     buildingData: BuildingData
-    numberText: Text
+    costText: Text
+    starIcon: Image
     private scaleTween: Tween;
 
     constructor(scene: MainGameScene, x: number, y: number, resource: BuildingData) {
         this.buildingData = resource
         this.slot = scene.add.image(0, 0, 'inventory/slot')
-        this.icon = scene.add.image(0, 20, resource.textureName)
+        this.icon = scene.add.image(0, 0, resource.textureName)
         this.icon.setOrigin(0.5, 1)
-        this.numberText = scene.add.text(20, 20, "0", {
+        this.costText = scene.add.text(-30, 15, "0", {
             fontSize: 30,
             color: '000',
             align: "center"
         })
-        this.container = scene.add.container(x, y, [this.slot, this.icon, this.numberText])
+        this.starIcon = scene.add.image(15, 25, 'star')
+        this.container = scene.add.container(x, y, [this.slot, this.icon, this.costText, this.starIcon])
         this.container.setScale(0, 0)
 
         this.slot.setInteractive()
         this.slot.on("pointerdown", (pointer: Pointer) => {
             let building = new Building(scene, pointer.x, pointer.y, this.buildingData)
-            scene.town.removeFromInventory(this.buildingData)
             scene.dragBuilding(building)
         })
 
         this.shown = false
-    }
-
-
-    blendOut() {
-        this.tweenScaleTo(0, 300, false);
     }
 
     blendIn() {
@@ -61,6 +57,6 @@ export class BuildingDictionarySlot {
     }
 
     updateNumber(value: number) {
-        this.numberText.text = value + ""
+        this.costText.text = value + ""
     }
 }

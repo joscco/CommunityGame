@@ -2,6 +2,7 @@ import Vector2Like = Phaser.Types.Math.Vector2Like;
 
 export class Dict<K, V> {
     private map = new Map<string, [K, V]>()
+
     constructor(public toIdString: (k: K) => string, entries?: Iterable<[K, V]>) {
         if (entries) {
             for (const [k, v] of entries) {
@@ -9,10 +10,12 @@ export class Dict<K, V> {
             }
         }
     }
+
     set(k: K, v: V) {
         this.map.set(this.toIdString(k), [k, v]);
         return this;
     }
+
     get(k: K): V | undefined {
         return this.map.get(this.toIdString(k))?.[1]
     }
@@ -32,8 +35,19 @@ export class Dict<K, V> {
     delete(k: K): void {
         this.map.delete(this.toIdString(k))
     }
+
     [Symbol.iterator](): Iterator<[K, V]> {
         return this.map.values();
+    }
+
+    getEntriesWith(lamda: (k: K, v: V) => boolean): Array<[K, V]> {
+        let entries: [K, V][] = []
+        for (let [id, [key, value]] of this.map.entries()) {
+            if (lamda(key, value)) {
+                entries.push([key, value])
+            }
+        }
+        return entries
     }
 }
 
