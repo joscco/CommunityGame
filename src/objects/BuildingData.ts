@@ -1,107 +1,70 @@
 export type BuildingData = {
-    costInStars: number,
+    cost: number,
+    gain: number,
     name: BuildingName,
-    recipe?: BuildingName[],
     textureName: string,
-    rows: number,
-    columns: number,
 
-    naturePlus?: number,
-    knowledgePlus?: number,
-    healthPlus?: number,
-    sexPlus?: number,
-    foodPlus?: number,
-    funPlus?: number,
-    communityPlus?: number,
-    energyPlus?: number,
+    needs?: [BuildingNeed, number][]
+    gains?: [BuildingNeed, number][]
 }
 
-export type BuildingName = 'tent' | 'big_tent' | 'fire' | 'hut' | 'tree' | 'house' | 'tall_house' | 'court'
+export type BuildingNeed = 'nature' | 'knowledge' | 'health' | 'sex' | 'food' | 'fun' | 'community' | 'energy'
+
+export type BuildingName = 'tent' | 'big_tent' | 'fire' | 'hut' | 'tree' | 'house' | 'tall_house' | 'court'| 'crop'
 
 export const TENT: BuildingData = {
-    costInStars: 1,
+    cost: 1,
+    gain: 0,
     name: 'tent',
     textureName: 'buildings/tent',
-    rows: 1,
-    columns: 1,
-    communityPlus: 1
+    gains: [["community", 1]]
 }
 export const PINE: BuildingData = {
-    costInStars: 1,
+    cost: 1,
+    gain: 0,
     name: 'tree',
     textureName: 'buildings/pine',
-    rows: 1,
-    columns: 1,
-    naturePlus: 1
+    gains: [["nature", 1]]
 }
 
 export const BIG_TENT: BuildingData = {
-    costInStars: 2,
+    cost: 2,
+    gain: 2,
     name: 'big_tent',
-    recipe: ['tent', 'tent'],
     textureName: 'buildings/big_tent',
-    rows: 1,
-    columns: 1,
-    communityPlus: 2
+    gains: [["community", 2]]
 }
 
 export const HUT: BuildingData = {
-    costInStars: 3,
+    cost: 222,
     name: 'hut',
-    recipe: ['fire', 'tent'],
+    gain: 10,
     textureName: 'buildings/hut',
-    rows: 1,
-    columns: 1,
-    naturePlus: 1
+    needs: [["nature", 1], ["energy", 2]],
+    gains: [["community", 2]]
 }
 
 export const FIRE: BuildingData = {
-    costInStars: 1,
+    cost: 1,
+    gain: 1,
     name: 'fire',
-    recipe: ['tree', 'tent'],
     textureName: 'buildings/fire',
-    rows: 1,
-    columns: 1,
-    communityPlus: 1
+    gains: [["community", 3]]
 }
 
-export const HOUSE: BuildingData = {
-    costInStars: 4,
-    name: 'house',
-    recipe: ['hut', 'hut'],
-    textureName: 'buildings/house',
-    rows: 2,
-    columns: 1,
-    communityPlus: 7
-}
-
-export const LARGE_HOUSE: BuildingData = {
-    costInStars: 5,
-    name: 'tall_house',
-    recipe: ['house', 'house'],
-    textureName: 'buildings/tall_house',
-    rows: 3,
-    columns: 1,
-    communityPlus: 7
-}
-
-export const COURT: BuildingData = {
-    costInStars: 5,
-    name: 'court',
-    recipe: ['fire', 'big_tent'],
-    textureName: 'buildings/court',
-    rows: 2,
-    columns: 2,
-    communityPlus: 10
+export const CROP: BuildingData = {
+    cost: 1,
+    gain: 1,
+    name: 'crop',
+    textureName: 'buildings/crop',
+    gains: [["food", 3]]
 }
 
 export const BUILDINGS: BuildingData[] = [
     TENT,
     PINE,
-    BIG_TENT,
+    CROP,
     HUT,
     FIRE,
-    HOUSE,
-    LARGE_HOUSE,
-    COURT
+
 ]

@@ -8,8 +8,8 @@ export class BuildingDictionary {
     slots: BuildingDictionarySlot[] = []
 
     constructor(scene: MainGameScene, startData: BuildingData[]) {
-        for (let i = 0; i < 9; i++) {
-            let x = (i - 4) * 140
+        for (let i = 0; i < 5; i++) {
+            let x = (i - 2) * 140
             this.slots.push(new BuildingDictionarySlot(scene, x, 0))
         }
 
@@ -17,7 +17,7 @@ export class BuildingDictionary {
             this.slots[i].setBuildingData(startData[i])
         }
 
-        this.container = scene.add.container(GAME_WIDTH / 2, GAME_HEIGHT - 150, this.slots.flatMap(slot => [slot.slot, slot.container]))
+        this.container = scene.add.container(GAME_WIDTH / 2, GAME_HEIGHT - 150, this.slots.flatMap(slot => [slot.container]))
         this.container.depth = GAME_HEIGHT
     }
 
@@ -26,7 +26,7 @@ export class BuildingDictionary {
             let buildingData = slot.buildingData
             let value = resources.get(buildingData) ?? false
             if (!slot.shown && value) {
-                slot.updateNumber(buildingData.costInStars)
+                slot.updateNumber(buildingData.cost)
                 slot.blendIn()
             }
         })

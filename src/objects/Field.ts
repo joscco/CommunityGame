@@ -3,8 +3,8 @@ import {Scene} from "phaser";
 import Tween = Phaser.Tweens.Tween;
 import Vector2Like = Phaser.Types.Math.Vector2Like;
 
-export const FIELD_WIDTH = 100
-export const FIELD_HEIGHT = 75
+export const FIELD_WIDTH = 125
+export const FIELD_HEIGHT = 125
 
 export class Field extends Image {
 

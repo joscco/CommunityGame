@@ -40,10 +40,10 @@ export class Dict<K, V> {
         return this.map.values();
     }
 
-    getEntriesWith(lamda: (k: K, v: V) => boolean): Array<[K, V]> {
+    getEntries(lamda?: (k: K, v: V) => boolean): Array<[K, V]> {
         let entries: [K, V][] = []
         for (let [id, [key, value]] of this.map.entries()) {
-            if (lamda(key, value)) {
+            if (!lamda || lamda(key, value)) {
                 entries.push([key, value])
             }
         }
@@ -54,5 +54,11 @@ export class Dict<K, V> {
 export class Vector2Dict<V> extends Dict<Vector2Like, V> {
     constructor(entries?: Iterable<[Vector2Like, V]>) {
         super(v => "" + v.x + "," + v.y, entries);
+    }
+}
+
+export class NeighborPairDict<V> extends Dict<[Vector2Like, Vector2Like], V> {
+    constructor(entries?: Iterable<[[Vector2Like, Vector2Like], V]>) {
+        super(([v, w]) => "" + v.x + "," + v.y + "->" + w.x + "," + w.y, entries);
     }
 }

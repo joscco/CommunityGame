@@ -1,0 +1,81 @@
+import {BuildingData, BuildingNeed} from "./BuildingData";
+import {MainGameScene} from "../Game";
+import Image = Phaser.GameObjects.Image;
+import Container = Phaser.GameObjects.Container;
+import Text = Phaser.GameObjects.Text;
+
+export function getColorForNeed(need: BuildingNeed): number {
+    switch (need) {
+        case "community":
+            return 0x5c6a72
+        case "nature":
+            return 0x285454
+        case "food":
+            return 0x9e4639
+        case "knowledge":
+            return 0x9e4639
+        case "energy":
+            return 0xffa315
+    }
+    return 0xaa00aa
+}
+
+export class NeedIcon extends Container {
+
+    isNeed: boolean
+    need: BuildingNeed
+    initalValue: number
+    currentValue: number
+    plate: Image
+    text: Text
+
+    constructor(scene: MainGameScene, x: number, y: number, isNeed: boolean, need: BuildingNeed, amount: number) {
+        super(scene, x, y)
+        scene.add.existing(this)
+
+        this.plate = scene.add.image(0, 0, 'needRect')
+        this.plate.tint = getColorForNeed(need)
+
+        this.isNeed = isNeed
+        this.need = need
+        this.initalValue = amount
+        this.currentValue = amount
+
+        this.text = scene.add.text(0, 0, "0", {
+            fontSize: 20,
+            color: "#ffffff",
+            align: "center",
+            fontFamily: "Londrina"
+        })
+        this.text.setOrigin(0.5)
+        this.changeNumber(amount)
+
+        this.add([this.plate, this.text])
+
+        this.scale = 0
+        this.blendIn()
+    }
+
+    blendIn() {
+        this.scene.tweens.add({
+            targets: this,
+            scale: 1,
+            duration: 200,
+            ease: Phaser.Math.Easing.Back.Out
+        })
+    }
+
+    blendOut() {
+        this.scene.tweens.add({
+            targets: this,
+            scale: 0,
+            duration: 200,
+            ease: Phaser.Math.Easing.Back.Out
+        })
+    }
+
+    changeNumber(amount: number) {
+        this.currentValue = amount
+        this.text.text = (this.isNeed ? "+" : "") + amount
+    }
+}

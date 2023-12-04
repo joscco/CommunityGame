@@ -9,36 +9,37 @@ import Tween = Phaser.Tweens.Tween;
 
 export class BuildingDictionarySlot {
     container: Container
-    slot: Image
     buildingImage: Image
     shown: boolean
     buildingData: BuildingData
     costText: Text
-    starIcon: Image
+    coinIcon: Image
     private scaleTween: Tween;
 
     constructor(scene: MainGameScene, x: number, y: number) {
 
-        this.slot = scene.add.image(x, y, 'inventory/slot')
+        //this.slot = scene.add.image(x, y, 'inventory/slot')
         this.buildingImage = scene.add.image(0, 0, undefined)
-        this.buildingImage.setOrigin(0.5, 1)
         this.buildingImage.scale = 0.8
-        this.costText = scene.add.text(-30, 15, "0", {
+
+        this.costText = scene.add.text(-15, 50, "0", {
             fontSize: 30,
             color: '000',
-            align: "center",
+            align: "right",
             fontFamily: "Londrina"
         })
-        this.starIcon = scene.add.image(15, 25, 'star')
-        this.container = scene.add.container(x, y, [this.buildingImage, this.costText, this.starIcon])
+        this.costText.setOrigin(1, 0.5)
+        this.coinIcon = scene.add.image(-5, 50, 'coin')
+        this.coinIcon.setOrigin(0, 0.5)
+        this.container = scene.add.container(x, y, [this.buildingImage, this.costText, this.coinIcon])
         this.container.setScale(0, 0)
 
-        this.slot.setInteractive()
+        //this.slot.setInteractive()
         this.buildingImage.setInteractive()
         this.buildingImage.on("pointerdown", (pointer: Pointer) =>
             this.addNewBuildingAndDrag(scene, pointer))
-        this.slot.on("pointerdown", (pointer: Pointer) =>
-            this.addNewBuildingAndDrag(scene, pointer))
+        // this.slot.on("pointerdown", (pointer: Pointer) =>
+        //     this.addNewBuildingAndDrag(scene, pointer))
 
         this.shown = false
     }

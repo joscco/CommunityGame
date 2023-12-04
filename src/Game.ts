@@ -18,6 +18,9 @@ export class MainGameScene extends Phaser.Scene {
     }
 
     preload() {
+        this.load.image('plate', 'assets/images/plate.png');
+        this.load.image('needRect', 'assets/images/needRect.png');
+        this.load.image('arrow', 'assets/images/arrow.png');
         this.load.image('field', 'assets/images/field.png');
         this.load.image('field_inner', 'assets/images/fieldInner.png');
         this.load.image('field_inner_canceled', 'assets/images/fieldInnerCanceled.png');
@@ -29,44 +32,36 @@ export class MainGameScene extends Phaser.Scene {
         this.load.image('buildings/fire', 'assets/images/fire.png');
         this.load.image('buildings/hut', 'assets/images/hut.png');
         this.load.image('buildings/pine', 'assets/images/pine.png');
-        this.load.image('buildings/house', 'assets/images/house.png');
-        this.load.image('buildings/tall_house', 'assets/images/tall_house.png');
-        this.load.image('buildings/court', 'assets/images/court.png');
+        this.load.image('buildings/crop', 'assets/images/crop.png');
 
         // UI
-        this.load.image('star', 'assets/images/star.png');
+        this.load.image('coin', 'assets/images/coin.png');
         this.load.image('inventory/slot', 'assets/images/inventory_slot.png');
     }
 
     create() {
-        this.town = new Town(this, 9, 13)
+        this.town = new Town(this, 12, 6)
 
         BUILDINGS.forEach(building => this.town.catalogue.set(building, false))
-        BUILDINGS.filter(building => !building.recipe)
-            .forEach(building => this.town.addToCatalogue(building))
+        BUILDINGS.forEach(building => this.town.addToCatalogue(building))
 
         // Add person
-        for (let i = 0; i < 5; i++) {
-            let person = new Person(
-                this,
-                GAME_WIDTH / 2 - 150 + Math.random() * 300,
-                GAME_HEIGHT / 2 - 150 + Math.random() * 300
-            )
-            person.scale = 0
-            this.people.push(person)
-
-            this.tweens.add({
-                targets: person,
-                scale: 1,
-                duration: 300,
-                ease: Phaser.Math.Easing.Back.Out
-            })
-        }
-
-        // Add tent
-        let tent = new Building(this, GAME_WIDTH / 2, GAME_HEIGHT / 2, TENT)
-        tent.scale = 0
-        this.town.setBuildingAt([{x: 6, y: 4}], tent)
+        // for (let i = 0; i < 5; i++) {
+        //     let person = new Person(
+        //         this,
+        //         GAME_WIDTH / 2 - 150 + Math.random() * 300,
+        //         GAME_HEIGHT / 2 - 150 + Math.random() * 300
+        //     )
+        //     person.scale = 0
+        //     this.people.push(person)
+        //
+        //     this.tweens.add({
+        //         targets: person,
+        //         scale: 1,
+        //         duration: 300,
+        //         ease: Phaser.Math.Easing.Back.Out
+        //     })
+        // }
     }
 
     update(time: number, delta: number) {
@@ -78,8 +73,7 @@ export class MainGameScene extends Phaser.Scene {
     dragBuilding(building: Building) {
         this.draggedBuilding = building
         this.dragging = true
-        building.depth = GAME_HEIGHT
-        this.children.bringToTop(building)
+        building.depth = 1
     }
 }
 
