@@ -1,4 +1,4 @@
-import {BuildingData, BuildingNeed} from "./BuildingData";
+import {BuildingNeed} from "./BuildingData";
 import {MainGameScene} from "../Game";
 import Image = Phaser.GameObjects.Image;
 import Container = Phaser.GameObjects.Container;
@@ -70,12 +70,22 @@ export class NeedIcon extends Container {
             targets: this,
             scale: 0,
             duration: 200,
-            ease: Phaser.Math.Easing.Back.Out
+            ease: Phaser.Math.Easing.Back.In
         })
     }
 
     changeNumber(amount: number) {
         this.currentValue = amount
-        this.text.text = (this.isNeed ? "+" : "") + amount
+        this.text.text = (this.isNeed ? "-" : "") + amount
+
+        if (this.currentValue <= 0) {
+            this.blendOut()
+        } else {
+           this.blendIn()
+        }
+    }
+
+    reset() {
+        this.changeNumber(this.initalValue)
     }
 }

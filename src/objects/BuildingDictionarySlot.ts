@@ -51,7 +51,7 @@ export class BuildingDictionarySlot {
 
     private addNewBuildingAndDrag(scene: MainGameScene, pointer: Phaser.Input.Pointer) {
         if (this.shown) {
-            let building = new Building(scene, pointer.x, pointer.y, this.buildingData)
+            let building = new Building(scene, {x: 0, y: 0}, pointer.x, pointer.y, this.buildingData)
             scene.dragBuilding(building)
         }
     }

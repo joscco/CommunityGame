@@ -49,7 +49,7 @@ export const FIRE: BuildingData = {
     gain: 1,
     name: 'fire',
     textureName: 'buildings/fire',
-    gains: [["community", 3]]
+    gains: [["community", 3], ["energy", 2]]
 }
 
 export const CROP: BuildingData = {

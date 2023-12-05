@@ -1,4 +1,5 @@
 import Vector2Like = Phaser.Types.Math.Vector2Like;
+import {Vector2} from "../objects/Town";
 
 export class Dict<K, V> {
     private map = new Map<string, [K, V]>()
@@ -51,14 +52,14 @@ export class Dict<K, V> {
     }
 }
 
-export class Vector2Dict<V> extends Dict<Vector2Like, V> {
-    constructor(entries?: Iterable<[Vector2Like, V]>) {
+export class Vector2Dict<V> extends Dict<Vector2, V> {
+    constructor(entries?: Iterable<[Vector2, V]>) {
         super(v => "" + v.x + "," + v.y, entries);
     }
 }
 
-export class NeighborPairDict<V> extends Dict<[Vector2Like, Vector2Like], V> {
-    constructor(entries?: Iterable<[[Vector2Like, Vector2Like], V]>) {
+export class NeighborPairDict<V> extends Dict<[Vector2, Vector2], V> {
+    constructor(entries?: Iterable<[[Vector2, Vector2], V]>) {
         super(([v, w]) => "" + v.x + "," + v.y + "->" + w.x + "," + w.y, entries);
     }
 }

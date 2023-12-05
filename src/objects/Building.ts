@@ -4,23 +4,25 @@ import Image = Phaser.GameObjects.Image;
 import Container = Phaser.GameObjects.Container;
 import Text = Phaser.GameObjects.Text;
 import {NeedIcon} from "./NeedIcon";
+import {Vector2} from "./Town";
 
 export class Building extends Container {
 
+    index: Vector2
     plate: Image
     icon: Image
     buildingData: BuildingData
 
     gainText: Text
 
-    gainTexts: NeedIcon[]
-    needsTexts: NeedIcon[]
-    arrows: Image[]
+    supplies: NeedIcon[]
+    needs: NeedIcon[]
 
-    constructor(scene: MainGameScene, x: number, y: number, buildingData: BuildingData) {
+    constructor(scene: MainGameScene, index: Vector2, x: number, y: number, buildingData: BuildingData) {
         super(scene, x, y)
         scene.add.existing(this)
 
+        this.index = index
         this.plate = scene.add.image(0, 0, 'plate')
         this.icon = scene.add.image(0, 0, buildingData.textureName)
 
@@ -31,15 +33,13 @@ export class Building extends Container {
             fontFamily: "Londrina"
         })
 
-        this.gainTexts = (buildingData.gains ?? [])
+        this.supplies = (buildingData.gains ?? [])
             .map(([gain, amount], i) => new NeedIcon(scene, -35 + i * 35, 35, false, gain, amount))
 
-        this.needsTexts = (buildingData.needs ?? [])
+        this.needs = (buildingData.needs ?? [])
             .map(([need, amount], i) => new NeedIcon(scene, -35 + i * 35, -35, true, need, amount))
 
-
-
-        this.add([this.plate, this.icon, this.gainText, ...this.needsTexts, ...this.gainTexts])
+        this.add([this.plate, this.icon, this.gainText, ...this.needs, ...this.supplies])
 
         this.buildingData = buildingData
         this.scale = 0
@@ -55,7 +55,8 @@ export class Building extends Container {
         })
     }
 
-    tweenMoveTo(x: number, y: number) {
+    tweenMoveTo(index: Vector2, x: number, y: number) {
+        this.index = index
         this.scene.tweens.add({
             targets: this,
             x: x,
@@ -88,7 +89,26 @@ export class Building extends Container {
         return this.buildingData.name
     }
 
-    tryToSupplyWith(neighbors: Building[]) {
+    takeAway(need: BuildingNeed, amount: number) {
+        let icon = this.supplies.find(icon => icon.need === need)
+        if (icon) {
+            icon.changeNumber(icon.currentValue - amount)
+        }
+    }
 
+    give(need: BuildingNeed, amount: number) {
+        let icon = this.needs.find(icon => icon.need === need)
+        if (icon) {
+            icon.changeNumber(icon.currentValue - amount)
+        }
+    }
+
+    getPossibleSupplyAmount(needType: BuildingNeed): number {
+        return this.supplies.find(icon => icon.need === needType)?.currentValue
+    }
+
+    reset() {
+        this.supplies.forEach(supply => supply.reset())
+        this.needs.forEach(need => need.reset())
     }
 }

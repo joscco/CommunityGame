@@ -1,6 +1,4 @@
-import Vector2Like = Phaser.Types.Math.Vector2Like;
 import Pointer = Phaser.Input.Pointer;
-import Image = Phaser.GameObjects.Image;
 import {BuildingData, BuildingNeed, BUILDINGS} from "./BuildingData";
 import {BuildingDictionary} from "./BuildingDictionary";
 import {GAME_HEIGHT, GAME_WIDTH, MainGameScene} from "../Game";
@@ -16,6 +14,8 @@ const ARROW_POSITIONS = [
     {x: -25, y: -65},
 ]
 
+export type Vector2 = {x: number, y: number}
+
 export class Town {
 
     level: number;
@@ -25,7 +25,7 @@ export class Town {
     entities: Vector2Dict<Building> = new Vector2Dict()
     catalogue: Map<BuildingData, boolean> = new Map([])
     buildingDictionary: BuildingDictionary
-    fields: Map<Vector2Like, Field>
+    fields: Map<Vector2, Field>
     arrows: NeighborPairDict<Arrow>
 
     private fieldAreaWidth: number;
@@ -55,12 +55,12 @@ export class Town {
                     let position = this.getPositionForIndex(index)
                     let offset = ARROW_POSITIONS[i]
                     let rotation = Phaser.Math.Angle.Between(index.x, index.y, neighborIndex.x, neighborIndex.y)
-                    return [[index, neighborIndex], new Arrow(this.scene, position, rotation, offset)] as [[Vector2Like, Vector2Like], Arrow]
+                    return [[index, neighborIndex], new Arrow(this.scene, position, rotation, offset)] as [[Vector2, Vector2], Arrow]
                 })
         }))
     }
 
-    private getPositionForIndex(index: Vector2Like): Vector2Like {
+    private getPositionForIndex(index: Phaser.Types.Math.Vector2Like): Vector2 {
         return {
             x: this.offsetFirstX + index.x * FIELD_WIDTH,
             y: this.offsetFirstY + index.y * FIELD_HEIGHT
@@ -92,17 +92,27 @@ export class Town {
         }
     }
 
-    private isFree(index: Vector2Like): boolean {
+    private isFree(index: Vector2): boolean {
         return !this.entities.has(index)
     }
 
-    private static cartesian(first: number[], second: number[]): Vector2Like[] {
+    private static cartesian(first: number[], second: number[]): Vector2[] {
         return first.flatMap(a => second.map(b => {
             return {x: a, y: b}
         }))
     }
 
-    private blendInArrow(from: Vector2Like, to: Vector2Like, amount: number, need: BuildingNeed) {
+    private blendOutArrow(from: Vector2, to: Vector2) {
+        let arrow = this.arrows.get([from, to])
+        this.scene.tweens.add({
+            targets: arrow,
+            scale: 0,
+            duration: 200,
+            ease: Phaser.Math.Easing.Back.Out
+        })
+    }
+
+    private blendInArrow(from: Vector2, to: Vector2, amount: number, need: BuildingNeed) {
         let arrow = this.arrows.get([from, to])
         arrow.setText(amount, need)
         this.scene.tweens.add({
@@ -113,7 +123,7 @@ export class Town {
         })
     }
 
-    private markFieldsClosestTo(rows: number, columns: number, mousePosition: Vector2Like) {
+    private markFieldsClosestTo(rows: number, columns: number, mousePosition: Vector2) {
         let index = this.getClosestIndexTo(rows, columns, mousePosition);
 
         this.fields.forEach(field => {
@@ -127,13 +137,13 @@ export class Town {
 
     removeBuilding(building: Building) {
         this.entities.deleteAllWithValue(building)
-        this.checkStatus();
+        this.checkStatus(building);
     }
 
-    setBuildingAt(index: Vector2Like, building: Building) {
+    setBuildingAt(index: Vector2, building: Building) {
         this.entities.set(index, building)
         let pos = this.getPositionForIndex(index)
-        building.tweenMoveTo(pos.x, pos.y)
+        building.tweenMoveTo(index, pos.x, pos.y)
 
         this.rollNewBuildings()
         this.checkStatus();
@@ -144,7 +154,7 @@ export class Town {
         this.buildingDictionary.updateResources(this.catalogue)
     }
 
-    private initFields(columns: number, rows: number): Map<Vector2Like, Field> {
+    private initFields(columns: number, rows: number): Map<Vector2, Field> {
         this.columns = columns
         this.rows = rows
         this.fieldAreaWidth = columns * FIELD_WIDTH
@@ -152,7 +162,7 @@ export class Town {
         this.offsetFirstX = (GAME_WIDTH - this.fieldAreaWidth) / 2 + FIELD_WIDTH / 2
         this.offsetFirstY = (GAME_HEIGHT - this.fieldAreaHeight) / 2 + FIELD_HEIGHT / 2 - 130
 
-        let fields = new Map<Vector2Like, Field>();
+        let fields = new Map<Vector2, Field>();
         for (let x = 0; x < columns; x++) {
             for (let y = 0; y < rows; y++) {
                 let field = new Field(this.scene, x, y, this.offsetFirstX + FIELD_WIDTH * x, this.offsetFirstY + FIELD_HEIGHT * y)
@@ -171,7 +181,7 @@ export class Town {
         return fields
     }
 
-    private getClosestIndexTo(rows: number, columns: number, mousePosition: Phaser.Types.Math.Vector2Like) : Vector2Like{
+    private getClosestIndexTo(rows: number, columns: number, mousePosition: Phaser.Types.Math.Vector2Like): Vector2 {
         let indicesX = this.getClosestIndices(this.offsetFirstX, FIELD_WIDTH, this.columns, columns, mousePosition.x)
         let indicesY = this.getClosestIndices(this.offsetFirstY, FIELD_HEIGHT, this.rows, rows, mousePosition.y)
 
@@ -198,19 +208,42 @@ export class Town {
         // change something
     }
 
-    private checkStatus() {
+    private checkStatus(building?: Building) {
+        [...this.fields.keys()].forEach(index => {
+            this.getNeighborIndicesOf(index).forEach(neighborIndex => this.blendOutArrow(index, neighborIndex))
+            this.entities.get(index)?.reset()
+        })
+        building?.reset()
         this.entities.getEntries().forEach(([index, building]) => {
-            let neighbors = this.getNeighborIndicesOf(index)
-            // building.tryToSupplyWith(neighbors)
-            neighbors.forEach(neighborIndex => {
-                if (this.entities.has(neighborIndex)) {
-                    this.blendInArrow(index, neighborIndex, 0, 'energy')
+            let neighbors = this.getNeighborsOfIndex(index)
+            this.getSufficientSuppliers(building, neighbors)
+        })
+    }
+    
+    private getSufficientSuppliers(building: Building, neighbors: Building[]): void {
+        // [From, To, Need, Amount] []
+        building.needs.map(needItem => {
+            let needType = needItem.need
+            let firstAmount = needItem.currentValue
+
+            if (firstAmount > 0) {
+                for (let neighbor of neighbors) {
+                    let neededAmount = needItem.currentValue
+                    if (neededAmount > 0) {
+                        let possibleAmount = neighbor.getPossibleSupplyAmount(needType)
+                        if (possibleAmount > 0) {
+                            let realAmount = Math.min(neededAmount, possibleAmount)
+                            neighbor.takeAway(needType, realAmount)
+                            building.give(needType, realAmount)
+                            this.blendInArrow(neighbor.index, building.index, realAmount, needType)
+                        }
+                    }
                 }
-            })
+            }
         })
     }
 
-    private getNeighborIndicesOf(index: Vector2Like): Vector2Like[] {
+    private getNeighborIndicesOf(index: Phaser.Types.Math.Vector2Like): Vector2[] {
         return [
             {x: index.x + 1, y: index.y},
             {x: index.x, y: index.y + 1},
@@ -219,14 +252,10 @@ export class Town {
         ]
     }
 
-    private getNeighborsOfIndex(index: Phaser.Types.Math.Vector2Like): Building[] {
+    private getNeighborsOfIndex(index: Vector2): Building[] {
         // Adapt this to buildings that take up more than one field!
         let neighborIndices = this.getNeighborIndicesOf(index)
         return neighborIndices.map(index => this.entities.get(index))
             .filter(neighbor => neighbor)
-    }
-
-    private average(pos: Phaser.Types.Math.Vector2Like, neighborPos: Phaser.Types.Math.Vector2Like) {
-        return {x: (pos.x + neighborPos.x) / 2, y: (pos.y + neighborPos.y) / 2}
     }
 }

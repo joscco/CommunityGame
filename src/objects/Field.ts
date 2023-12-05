@@ -2,6 +2,7 @@ import Image = Phaser.GameObjects.Image;
 import {Scene} from "phaser";
 import Tween = Phaser.Tweens.Tween;
 import Vector2Like = Phaser.Types.Math.Vector2Like;
+import {Vector2} from "./Town";
 
 export const FIELD_WIDTH = 125
 export const FIELD_HEIGHT = 125
@@ -10,7 +11,7 @@ export class Field extends Image {
 
     inner: Image
     innerShown: boolean
-    index: Vector2Like;
+    index: Vector2;
     private scaleTween: Tween
 
     constructor(scene: Scene, i: number, j: number, x: number, y: number) {

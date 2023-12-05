@@ -17,9 +17,12 @@ export class Arrow extends Container {
 
         this.depth = 20
         this.scale = 0
-        this.rotation = rotation
 
         this.sprite = this.scene.add.image(0, 0, 'arrow')
+        // Only rotate sprite so that text isn't rotated
+        this.sprite.rotation = rotation
+
+
         this.text = scene.add.text(-2, 0, "0", {
             fontSize: 20,
             color: '#ffffff',
