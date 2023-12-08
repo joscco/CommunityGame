@@ -58,4 +58,12 @@ export class Arrow extends Container {
         })
     }
 
+    blendOut() {
+        this.scene.tweens.add({
+            targets: this,
+            scale: 0,
+            duration: 200,
+            ease: Phaser.Math.Easing.Back.Out
+        })
+    }
 }

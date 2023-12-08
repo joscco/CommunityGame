@@ -3,55 +3,53 @@ import {MainGameScene} from "../Game";
 import Image = Phaser.GameObjects.Image;
 import Container = Phaser.GameObjects.Container;
 import Text = Phaser.GameObjects.Text;
-import {NeedIcon} from "./NeedIcon";
-import {Vector2} from "./Town";
+import {getColorForNeed, NeedIcon} from "./NeedIcon";
+import {Vector2} from "../general/MathUtils";
 
 export class Building extends Container {
 
     index: Vector2
-    plate: Image
     icon: Image
     buildingData: BuildingData
 
     gainText: Text
+    currentGainValue: number
 
-    supplies: NeedIcon[]
     needs: NeedIcon[]
 
     constructor(scene: MainGameScene, index: Vector2, x: number, y: number, buildingData: BuildingData) {
         super(scene, x, y)
         scene.add.existing(this)
 
+        this.buildingData = buildingData
         this.index = index
-        this.plate = scene.add.image(0, 0, 'plate')
         this.icon = scene.add.image(0, 0, buildingData.textureName)
 
-        this.gainText = scene.add.text(-30, 15, "0", {
-            fontSize: 30,
-            color: '000',
+        this.gainText = scene.add.text(0, 0, "0", {
+            fontSize: 50,
+            color: "#" + getColorForNeed(buildingData.gainType).toString(16),
             align: "center",
             fontFamily: "Londrina"
         })
-
-        this.supplies = (buildingData.gains ?? [])
-            .map(([gain, amount], i) => new NeedIcon(scene, -35 + i * 35, 35, false, gain, amount))
+        this.gainText.setOrigin(0.5)
 
         this.needs = (buildingData.needs ?? [])
-            .map(([need, amount], i) => new NeedIcon(scene, -35 + i * 35, -35, true, need, amount))
+            .map(([need, amount], i) => new NeedIcon(scene, -40 + i * 80, -40, true, need, amount))
 
-        this.add([this.plate, this.icon, this.gainText, ...this.needs, ...this.supplies])
+        this.setGainValue(buildingData.gain)
 
-        this.buildingData = buildingData
+        this.add([this.icon, this.gainText, ...this.needs])
+
         this.scale = 0
         this.depth = 0
         this.blendIn()
 
         // Show tear down button here instead
-        this.plate.setInteractive()
+        this.icon.setInteractive()
 
-        this.plate.on("pointerdown", () => {
+        this.icon.on("pointerdown", () => {
             scene.dragBuilding(this)
-            scene.town.removeBuilding(this)
+            scene.town.removeBuildingFromField(this)
         })
     }
 
@@ -76,12 +74,15 @@ export class Building extends Container {
     }
 
     blendOutThenDestroy() {
+        console.log("Blend out")
         this.scene.tweens.add({
             targets: this,
             scale: 0,
             duration: 200,
             ease: Phaser.Math.Easing.Back.In,
-            onComplete: () => this.destroy()
+            onComplete: () => {
+                this.destroy()
+            }
         })
     }
 
@@ -90,9 +91,9 @@ export class Building extends Container {
     }
 
     takeAway(need: BuildingNeed, amount: number) {
-        let icon = this.supplies.find(icon => icon.need === need)
-        if (icon) {
-            icon.changeNumber(icon.currentValue - amount)
+        if (this.buildingData.gainType === need) {
+
+            this.setGainValue(this.currentGainValue - amount)
         }
     }
 
@@ -101,14 +102,31 @@ export class Building extends Container {
         if (icon) {
             icon.changeNumber(icon.currentValue - amount)
         }
+
+        this.setGainValue(this.currentGainValue)
     }
 
     getPossibleSupplyAmount(needType: BuildingNeed): number {
-        return this.supplies.find(icon => icon.need === needType)?.currentValue
+        return this.buildingData.gainType === needType ? this.currentGainValue : 0
     }
 
     reset() {
-        this.supplies.forEach(supply => supply.reset())
+        this.setGainValue(this.buildingData.gain)
         this.needs.forEach(need => need.reset())
+    }
+
+    needsAreMet() {
+        return this.needs.every(need => need.currentValue <= 0);
+    }
+
+    isMoney() {
+        return this.buildingData.gainType === "money"
+    }
+
+    private setGainValue(newVal: number) {
+        this.currentGainValue = newVal
+        this.gainText.text = this.currentGainValue.toString()
+        this.gainText.alpha = this.needsAreMet() ? 1 : 0.5
+        this.gainText.scale = this.currentGainValue > 0 ? 1 : 0
     }
 }

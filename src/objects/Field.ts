@@ -1,8 +1,7 @@
 import Image = Phaser.GameObjects.Image;
 import {Scene} from "phaser";
 import Tween = Phaser.Tweens.Tween;
-import Vector2Like = Phaser.Types.Math.Vector2Like;
-import {Vector2} from "./Town";
+import {Vector2} from "../general/MathUtils";
 
 export const FIELD_WIDTH = 125
 export const FIELD_HEIGHT = 125
@@ -47,6 +46,16 @@ export class Field extends Image {
             alpha: scale,
             duration: duration,
             ease: ease
+        })
+    }
+
+    blendIn(delay: number, duration: number) {
+        this.scene.tweens.add({
+            targets: this,
+            alpha: 1,
+            delay: delay,
+            duration: duration,
+            ease: Phaser.Math.Easing.Quadratic.InOut
         })
     }
 }

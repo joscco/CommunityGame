@@ -1,5 +1,4 @@
-import Vector2Like = Phaser.Types.Math.Vector2Like;
-import {Vector2} from "../objects/Town";
+import {Vector2} from "./MathUtils";
 
 export class Dict<K, V> {
     private map = new Map<string, [K, V]>()

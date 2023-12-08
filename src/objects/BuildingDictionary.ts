@@ -17,7 +17,7 @@ export class BuildingDictionary {
             this.slots[i].setBuildingData(startData[i])
         }
 
-        this.container = scene.add.container(GAME_WIDTH / 2, GAME_HEIGHT - 150, this.slots.flatMap(slot => [slot.container]))
+        this.container = scene.add.container(GAME_WIDTH / 2, GAME_HEIGHT - 100, this.slots.flatMap(slot => [slot.container]))
         this.container.depth = GAME_HEIGHT
     }
 

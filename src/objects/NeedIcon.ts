@@ -16,6 +16,8 @@ export function getColorForNeed(need: BuildingNeed): number {
             return 0x9e4639
         case "energy":
             return 0xffa315
+        case "money":
+            return 0x000000
     }
     return 0xaa00aa
 }
@@ -76,7 +78,10 @@ export class NeedIcon extends Container {
 
     changeNumber(amount: number) {
         this.currentValue = amount
-        this.text.text = (this.isNeed ? "-" : "") + amount
+
+        if (amount != 0) {
+            this.text.text = (this.isNeed ? "-" : "") + amount
+        }
 
         if (this.currentValue <= 0) {
             this.blendOut()
