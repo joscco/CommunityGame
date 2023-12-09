@@ -5,6 +5,8 @@
 
 body {
     font-family: 'Londrina', sans-serif;
+    margin: 0;
+    overflow: hidden;
 }
 
 h1 {
