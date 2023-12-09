@@ -65,7 +65,7 @@ export class Town {
                 })
         }))
 
-        this.moneyText = scene.add.text(GAME_WIDTH / 2, 30, this.money.toString(), {
+        this.moneyText = scene.add.text(GAME_WIDTH / 2, 75, this.money.toString(), {
             fontSize: 50,
             color: '#000000',
             align: "center",
