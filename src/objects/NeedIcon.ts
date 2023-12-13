@@ -22,6 +22,22 @@ export function getColorForNeed(need: BuildingNeed): number {
     return 0xaa00aa
 }
 
+export function getFontColorForNeed(need: BuildingNeed): number {
+    switch (need) {
+        case "community":
+            return 0x000000
+        case "food":
+            return 0x9e4639
+        case "knowledge":
+            return 0x9e4639
+        case "energy":
+        case "money":
+        case "nature":
+            return 0xffffff
+    }
+    return 0xaa00aa
+}
+
 export class NeedIcon extends Container {
 
     isNeed: boolean
@@ -50,6 +66,7 @@ export class NeedIcon extends Container {
             fontFamily: "Londrina"
         })
         this.text.setOrigin(0.5)
+
         this.changeNumber(amount)
 
         this.add([this.plate, this.text])

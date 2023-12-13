@@ -1,48 +1,47 @@
 import Pointer = Phaser.Input.Pointer;
+import Text = Phaser.GameObjects.Text;
 import {BuildingData, BuildingNeed, BUILDINGS} from "./BuildingData";
 import {BuildingDictionary} from "./BuildingDictionary";
-import {GAME_HEIGHT, GAME_WIDTH, MainGameScene} from "../Game";
-import {Field, FIELD_HEIGHT, FIELD_WIDTH} from "./Field";
+import {GAME_WIDTH, MainGameScene} from "../Game";
 import {Building} from "./Building";
 import {NeighborPairDict, Vector2Dict} from "../general/Dict";
 import {Arrow} from "./Arrow";
-import {getDirectNeighborIndices, Vector2, vector2Equals} from "../general/MathUtils";
-import Text = Phaser.GameObjects.Text;
+import {vector2Neighbors, Vector2, vector2Equals} from "../general/MathUtils";
+import {FieldManager} from "./FieldManager";
+import {PointDisplay} from "./PointDisplay";
+import {DistributionCalculator, TownBuilding} from "./DistributionCalculator";
 
 const ARROW_POSITIONS = [
-    {x: 65, y: 0},
-    {x: 0, y: 65},
-    {x: -65, y: 0},
+    // Up
     {x: 0, y: -65},
+    // Right
+    {x: 65, y: 0},
+    // Bottom
+    {x: 0, y: 65},
+    // Left
+    {x: -65, y: 0},
 ]
 
 export class Town {
 
-    level: number;
-    money: number = 1;
-
-    moneyText: Text
-
     scene: MainGameScene
+
+    pointDisplay: PointDisplay
     entities: Vector2Dict<Building> = new Vector2Dict()
     catalogue: Map<BuildingData, boolean> = new Map([])
+    distributionCalculator = new DistributionCalculator()
 
     buildingDictionary: BuildingDictionary
-    fields: Map<Vector2, Field>
+    fieldManager: FieldManager
     arrows: NeighborPairDict<Arrow>
-
-    private fieldAreaWidth: number;
-    private fieldAreaHeight: number;
-    private offsetFirstX: number;
-    private offsetFirstY: number;
-    private columns: number;
-    private rows: number;
 
     constructor(scene: MainGameScene, columns: number, rows: number) {
         this.scene = scene
+
+        this.pointDisplay = new PointDisplay(scene, GAME_WIDTH / 2, 75)
         this.buildingDictionary = new BuildingDictionary(scene, BUILDINGS)
 
-        this.fields = this.initFields(columns, rows)
+        this.fieldManager = new FieldManager(scene, columns, rows)
 
         this.scene.input.on('pointermove', (pointer: Pointer) => {
             this.dragBuildingToPointer(pointer);
@@ -52,10 +51,10 @@ export class Town {
             this.releaseDraggedBuilding(pointer);
         })
 
-        this.arrows = new NeighborPairDict([...this.fields.keys()].flatMap(index => {
-            return getDirectNeighborIndices(index)
+        this.arrows = new NeighborPairDict(this.fieldManager.getFieldKeys().flatMap(index => {
+            return vector2Neighbors(index)
                 .map((neighborIndex, i) => {
-                    let position = this.getPositionForIndex(index)
+                    let position = this.fieldManager.getPositionForIndex(index)
                     let offset = ARROW_POSITIONS[i]
                     let rotation = Phaser.Math.Angle.Between(index.x, index.y, neighborIndex.x, neighborIndex.y)
                     return [
@@ -65,35 +64,46 @@ export class Town {
                 })
         }))
 
-        this.moneyText = scene.add.text(GAME_WIDTH / 2, 75, this.money.toString(), {
-            fontSize: 50,
-            color: '#000000',
-            align: "center",
-            fontFamily: "Londrina"
-        })
-        this.moneyText.setOrigin(0.5)
+        this.pointDisplay.updatePoints(0)
     }
 
-    private getPositionForIndex(index: Phaser.Types.Math.Vector2Like): Vector2 {
-        return {
-            x: this.offsetFirstX + index.x * FIELD_WIDTH,
-            y: this.offsetFirstY + index.y * FIELD_HEIGHT
-        }
+    removeBuildingFromField(building: Building) {
+        this.entities.deleteAllWithValue(building)
+        this.updateStatus(building);
+    }
+
+    setBuildingAt(index: Vector2, building: Building) {
+        this.entities.set(index, building)
+        let pos = this.fieldManager.getPositionForIndex(index)
+        building.depth = 0
+        building.tweenMoveTo(index, pos.x, pos.y)
+
+        this.rollNewBuildings()
+        this.updateStatus();
+    }
+
+    addToCatalogue(buildingData: BuildingData) {
+        this.catalogue.set(buildingData, true)
+        this.buildingDictionary.updateResources(this.catalogue)
+    }
+
+    private isFreeField(index: Vector2): boolean {
+        return !this.entities.has(index)
     }
 
     private releaseDraggedBuilding(pointer: Phaser.Input.Pointer) {
         let draggedBuilding = this.scene.draggedBuilding
         if (this.scene.dragging && draggedBuilding) {
-            let closestIndex = this.getClosestIndexTo(pointer)
+            let closestIndex = this.fieldManager.getClosestFieldIndexTo(pointer)
 
-            if (closestIndex && this.isFree(closestIndex)) {
+            if (closestIndex && this.isFreeField(closestIndex)) {
                 this.setBuildingAt(closestIndex, draggedBuilding)
             } else {
                 this.addToCatalogue(this.scene.draggedBuilding.buildingData)
                 draggedBuilding.blendOutThenDestroy();
             }
         }
-        this.fields.forEach(field => field.blendOutInner())
+        this.fieldManager.forEachField(field => field.blendOutInner())
         this.scene.dragging = false
     }
 
@@ -106,33 +116,21 @@ export class Town {
         }
     }
 
-    private isFree(index: Vector2): boolean {
-        return !this.entities.has(index)
-    }
+    private markFieldClosestTo(mousePosition: Vector2): void {
+        let index = this.fieldManager.getClosestFieldIndexTo(mousePosition);
 
-    private updateMoney(amount: number) {
-        this.money = amount
-        if (amount.toString() != this.moneyText.text) {
-            this.scene.tweens.chain({
-                targets: this.moneyText,
-                tweens: [{
-                    scale: 0,
-                    duration: 100,
-                    ease: Phaser.Math.Easing.Back.In,
-                    onComplete: () => {
-                        this.moneyText.text = amount.toString()
-                    }
-                }, {
-                    scale: 1,
-                    duration: 100,
-                    ease: Phaser.Math.Easing.Back.Out,
-                }]
-            })
-        }
+        this.fieldManager.forEachField(field => {
+            if (index && vector2Equals(index, field.index)) {
+                field.blendInInner(this.isFreeField(field.index))
+            } else {
+                field.blendOutInner()
+            }
+        })
     }
 
     private blendOutArrow(from: Vector2, to: Vector2) {
-        this.arrows.get([from, to]).blendOut()
+        let arrow = this.arrows.get([from, to])
+        arrow.blendOut()
     }
 
     private blendInArrow(from: Vector2, to: Vector2, amount: number, need: BuildingNeed) {
@@ -141,124 +139,68 @@ export class Town {
         arrow.blendIn()
     }
 
-    private markFieldClosestTo(mousePosition: Vector2) {
-        let index = this.getClosestIndexTo(mousePosition);
-
-        this.fields.forEach(field => {
-            if (index && vector2Equals(index, field.index)) {
-                field.blendInInner(this.isFree(field.index))
-            } else {
-                field.blendOutInner()
-            }
-        })
-    }
-
-    removeBuildingFromField(building: Building) {
-        this.entities.deleteAllWithValue(building)
-        this.updateStatus(building);
-    }
-
-    setBuildingAt(index: Vector2, building: Building) {
-        this.entities.set(index, building)
-        let pos = this.getPositionForIndex(index)
-        building.tweenMoveTo(index, pos.x, pos.y)
-
-        this.rollNewBuildings()
-        this.updateStatus();
-    }
-
-    addToCatalogue(buildingData: BuildingData) {
-        this.catalogue.set(buildingData, true)
-        this.buildingDictionary.updateResources(this.catalogue)
-    }
-
-    private initFields(columns: number, rows: number): Map<Vector2, Field> {
-        this.columns = columns
-        this.rows = rows
-        this.fieldAreaWidth = columns * FIELD_WIDTH
-        this.fieldAreaHeight = rows * FIELD_HEIGHT
-        this.offsetFirstX = (GAME_WIDTH - this.fieldAreaWidth) / 2 + FIELD_WIDTH / 2
-        this.offsetFirstY = (GAME_HEIGHT - this.fieldAreaHeight) / 2 + FIELD_HEIGHT / 2 - 50
-
-        let fields = new Map<Vector2, Field>();
-        for (let x = 0; x < columns; x++) {
-            for (let y = 0; y < rows; y++) {
-                let field = new Field(this.scene, x, y, this.offsetFirstX + FIELD_WIDTH * x, this.offsetFirstY + FIELD_HEIGHT * y)
-                field.alpha = 0
-                field.depth = 0
-                fields.set({x: x, y: y}, field)
-                field.blendIn((Math.abs(x) + Math.abs(y)) * 50, 300)
-            }
-        }
-        return fields
-    }
-
-    private getClosestIndexTo(mousePosition: Phaser.Types.Math.Vector2Like): Vector2 | undefined {
-        let indexX = this.getClosestIndex(this.offsetFirstX, FIELD_WIDTH, this.columns, mousePosition.x)
-        let indexY = this.getClosestIndex(this.offsetFirstY, FIELD_HEIGHT, this.rows, mousePosition.y)
-
-        if (indexX && indexY) {
-            return {x: indexX, y: indexY}
-        }
-
-        return undefined
-    }
-
-    private getClosestIndex(offset: number, expansion: number, maxValue: number, value: number): number | undefined {
-        let closestIndex = Math.floor((value - offset + expansion / 2) / expansion)
-        if (closestIndex < 0 || closestIndex >= maxValue) {
-            return undefined
-        }
-        return closestIndex
-    }
-
     private rollNewBuildings() {
         // change something
     }
 
     private updateStatus(building?: Building) {
-        [...this.fields.keys()].forEach(index => {
-            getDirectNeighborIndices(index)
-                .forEach(neighborIndex => this.blendOutArrow(index, neighborIndex))
-            this.entities.get(index)?.reset()
-        })
+        this.blendOutAllArrows();
+
         building?.reset()
-        this.entities.getEntries().forEach(([index, building]) => {
-            let neighbors = this.getNeighborBuildingsOfIndex(index)
-            this.getSufficientSuppliers(building, neighbors)
-        })
 
-        let entitiesValue = this.entities.getEntries((index, building) => building.isMoney() && building.needsAreMet())
-            .map(([index, building]) => building.buildingData.gain).reduce((a, b) => a + b, 0)
+        // Find best distribution
+        let newDistribution = DistributionCalculator.findOptimalDistribution(this.getTownState())
 
-        this.updateMoney(Math.max(entitiesValue, 1))
-    }
+        for (let producer of newDistribution.values()) {
+            let building = this.entities.get(producer.index)
+            building.updateSupply(producer.supplyLeft)
 
-    private getSufficientSuppliers(building: Building, neighbors: Building[]): void {
-        building.needs.map(needItem => {
-            let needType = needItem.need
-            let firstAmount = needItem.currentValue
+            for (let need of producer.needs) {
+                // Usually there's only one supplier
+                building.updateNeed(need.type, need.left)
 
-            if (firstAmount > 0) {
-                for (let neighbor of neighbors) {
-                    let neededAmount = needItem.currentValue
-                    if (neededAmount > 0) {
-                        let possibleAmount = neighbor.getPossibleSupplyAmount(needType)
-                        if (possibleAmount > 0) {
-                            let realAmount = Math.min(neededAmount, possibleAmount)
-                            neighbor.takeAway(needType, realAmount)
-                            building.give(needType, realAmount)
-                            this.blendInArrow(neighbor.index, building.index, realAmount, needType)
-                        }
+                for (let supplier of need.suppliers ?? []) {
+                    if (supplier.supply > 0) {
+                        this.blendInArrow(supplier.from, producer.index, supplier.supply, need.type)
                     }
                 }
             }
-        })
+        }
+
+        let entitiesValue = this.entities.getEntries((index, building) => building.isMoney() && building.needsAreMet())
+            .map(([index, building]) => building.buildingData.gain)
+            .reduce((a, b) => a + b, 0)
+
+        this.pointDisplay.updatePoints(Math.max(entitiesValue, 0))
     }
 
-    private getNeighborBuildingsOfIndex(index: Vector2): Building[] {
-        let neighborIndices = getDirectNeighborIndices(index)
-        return neighborIndices.map(index => this.entities.get(index))
-            .filter(neighbor => neighbor)
+    private getTownState() {
+        return new Map<number, TownBuilding>(
+            this.entities.getEntries()
+                .map(([index, building], i) => {
+                    return [i, {
+                        index: index,
+                        iterationIndex: i,
+                        supply: building.buildingData.gain,
+                        supplyLeft: building.buildingData.gain,
+                        supplyType: building.buildingData.gainType,
+                        needs: (building.buildingData.needs ?? [])
+                            .map(([need, num]) => {
+                                return {
+                                    type: need,
+                                    left: num
+                                }
+                            })
+                    }]
+                })
+        );
+    }
+
+    private blendOutAllArrows() {
+        this.fieldManager.forEachField((field, index) => {
+            vector2Neighbors(index)
+                .forEach(neighborIndex => this.blendOutArrow(index, neighborIndex))
+            this.entities.get(index)?.reset()
+        })
     }
 }

@@ -1,10 +1,10 @@
 import {BuildingData, BuildingNeed} from "./BuildingData";
 import {MainGameScene} from "../Game";
+import {getFontColorForNeed, NeedIcon} from "./NeedIcon";
+import {Vector2} from "../general/MathUtils";
 import Image = Phaser.GameObjects.Image;
 import Container = Phaser.GameObjects.Container;
 import Text = Phaser.GameObjects.Text;
-import {getColorForNeed, NeedIcon} from "./NeedIcon";
-import {Vector2} from "../general/MathUtils";
 
 export class Building extends Container {
 
@@ -25,16 +25,16 @@ export class Building extends Container {
         this.index = index
         this.icon = scene.add.image(0, 0, buildingData.textureName)
 
-        this.gainText = scene.add.text(0, 0, "0", {
-            fontSize: 50,
-            color: "#" + getColorForNeed(buildingData.gainType).toString(16),
+        this.gainText = scene.add.text(-40, -40, "0", {
+            fontSize: 20,
+            color: "#" + getFontColorForNeed(buildingData.gainType).toString(16),
             align: "center",
             fontFamily: "Londrina"
         })
         this.gainText.setOrigin(0.5)
 
         this.needs = (buildingData.needs ?? [])
-            .map(([need, amount], i) => new NeedIcon(scene, -40 + i * 80, -40, true, need, amount))
+            .map(([need, amount], i) => new NeedIcon(scene, -40 + i * 80, 40, true, need, amount))
 
         this.setGainValue(buildingData.gain)
 
@@ -74,7 +74,6 @@ export class Building extends Container {
     }
 
     blendOutThenDestroy() {
-        console.log("Blend out")
         this.scene.tweens.add({
             targets: this,
             scale: 0,
@@ -90,19 +89,17 @@ export class Building extends Container {
         return this.buildingData.name
     }
 
-    takeAway(need: BuildingNeed, amount: number) {
-        if (this.buildingData.gainType === need) {
-
-            this.setGainValue(this.currentGainValue - amount)
-        }
+    updateSupply(amount: number) {
+            this.setGainValue(amount)
     }
 
-    give(need: BuildingNeed, amount: number) {
+    updateNeed(need: BuildingNeed, amount: number) {
         let icon = this.needs.find(icon => icon.need === need)
         if (icon) {
-            icon.changeNumber(icon.currentValue - amount)
+            icon.changeNumber(amount)
         }
 
+        // This is not very clear
         this.setGainValue(this.currentGainValue)
     }
 
@@ -125,8 +122,22 @@ export class Building extends Container {
 
     private setGainValue(newVal: number) {
         this.currentGainValue = newVal
-        this.gainText.text = this.currentGainValue.toString()
-        this.gainText.alpha = this.needsAreMet() ? 1 : 0.5
-        this.gainText.scale = this.currentGainValue > 0 ? 1 : 0
+
+        if (this.currentGainValue > 0) {
+            this.gainText.text = this.currentGainValue.toString()
+        }
+
+        let newAlpha = this.needsAreMet() ? 1 : 0.5
+        let newScale = this.currentGainValue > 0 ? 1 : 0
+
+        this.scene.tweens.add(
+            {
+                targets: this.gainText,
+                alpha: newAlpha,
+                scale: newScale,
+                duration: 200,
+                ease: Phaser.Math.Easing.Quadratic.InOut
+            }
+        )
     }
 }
