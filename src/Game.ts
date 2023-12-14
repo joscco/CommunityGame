@@ -41,9 +41,7 @@ export class MainGameScene extends Phaser.Scene {
 
     create() {
         this.town = new Town(this, 10, 5)
-
-        BUILDINGS.forEach(building => this.town.catalogue.set(building, false))
-        BUILDINGS.forEach(building => this.town.addToCatalogue(building))
+        this.town.rollNewBuildings()
 
         // Add person
         // for (let i = 0; i < 5; i++) {

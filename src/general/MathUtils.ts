@@ -13,3 +13,7 @@ export function vector2Add(a: Vector2, b: Vector2): Vector2 {
 export function vector2Equals(index: Vector2, field: Vector2): boolean {
     return index.x === field.x && index.y === field.y
 }
+
+export function transpose(matrix: number[][]) {
+    return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+}

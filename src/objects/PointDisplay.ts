@@ -12,21 +12,21 @@ export class PointDisplay extends Container {
         super(scene, x, y);
         scene.add.existing(this)
 
-        this.pointsPreText = scene.add.text(-20, 0, "Points: ", {
-            fontSize: 50,
+        this.pointsPreText = scene.add.text(0, 0, "Points: ", {
+            fontSize: 25,
             color: '#000000',
-            align: "right",
+            align: "center",
             fontFamily: "Londrina"
         })
-        this.pointsPreText.setOrigin(1, 0.5)
+        this.pointsPreText.setOrigin(0.5)
 
-        this.pointsText = scene.add.text(20, 0, "", {
+        this.pointsText = scene.add.text(0, 40, "", {
             fontSize: 50,
             color: '#000000',
-            align: "left",
+            align: "center",
             fontFamily: "Londrina"
         })
-        this.pointsText.setOrigin(0, 0.5)
+        this.pointsText.setOrigin(0.5)
 
         this.add([this.pointsPreText, this.pointsText])
     }

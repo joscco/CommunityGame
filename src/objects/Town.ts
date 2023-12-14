@@ -1,12 +1,11 @@
 import Pointer = Phaser.Input.Pointer;
-import Text = Phaser.GameObjects.Text;
 import {BuildingData, BuildingNeed, BUILDINGS} from "./BuildingData";
-import {BuildingDictionary} from "./BuildingDictionary";
+import {BuildingShop} from "./BuildingShop";
 import {GAME_WIDTH, MainGameScene} from "../Game";
 import {Building} from "./Building";
 import {NeighborPairDict, Vector2Dict} from "../general/Dict";
 import {Arrow} from "./Arrow";
-import {vector2Neighbors, Vector2, vector2Equals} from "../general/MathUtils";
+import {Vector2, vector2Equals, vector2Neighbors} from "../general/MathUtils";
 import {FieldManager} from "./FieldManager";
 import {PointDisplay} from "./PointDisplay";
 import {DistributionCalculator, TownBuilding} from "./DistributionCalculator";
@@ -28,18 +27,17 @@ export class Town {
 
     pointDisplay: PointDisplay
     entities: Vector2Dict<Building> = new Vector2Dict()
-    catalogue: Map<BuildingData, boolean> = new Map([])
-    distributionCalculator = new DistributionCalculator()
 
-    buildingDictionary: BuildingDictionary
+    buildingShop: BuildingShop
     fieldManager: FieldManager
     arrows: NeighborPairDict<Arrow>
+    points: number
 
     constructor(scene: MainGameScene, columns: number, rows: number) {
         this.scene = scene
 
         this.pointDisplay = new PointDisplay(scene, GAME_WIDTH / 2, 75)
-        this.buildingDictionary = new BuildingDictionary(scene, BUILDINGS)
+        this.buildingShop = new BuildingShop(scene, 5)
 
         this.fieldManager = new FieldManager(scene, columns, rows)
 
@@ -64,7 +62,8 @@ export class Town {
                 })
         }))
 
-        this.pointDisplay.updatePoints(0)
+        this.points = 0
+        this.pointDisplay.updatePoints(this.points)
     }
 
     removeBuildingFromField(building: Building) {
@@ -73,18 +72,18 @@ export class Town {
     }
 
     setBuildingAt(index: Vector2, building: Building) {
+        let isNewBuilding = building.index == undefined
         this.entities.set(index, building)
         let pos = this.fieldManager.getPositionForIndex(index)
         building.depth = 0
         building.tweenMoveTo(index, pos.x, pos.y)
 
-        this.rollNewBuildings()
         this.updateStatus();
-    }
 
-    addToCatalogue(buildingData: BuildingData) {
-        this.catalogue.set(buildingData, true)
-        this.buildingDictionary.updateResources(this.catalogue)
+        // Reroll AFTER updating status
+        if (isNewBuilding) {
+            this.rollNewBuildings()
+        }
     }
 
     private isFreeField(index: Vector2): boolean {
@@ -99,7 +98,6 @@ export class Town {
             if (closestIndex && this.isFreeField(closestIndex)) {
                 this.setBuildingAt(closestIndex, draggedBuilding)
             } else {
-                this.addToCatalogue(this.scene.draggedBuilding.buildingData)
                 draggedBuilding.blendOutThenDestroy();
             }
         }
@@ -139,8 +137,12 @@ export class Town {
         arrow.blendIn()
     }
 
-    private rollNewBuildings() {
-        // change something
+    public rollNewBuildings() {
+        let Random = new Phaser.Math.RandomDataGenerator()
+        let buildingsToChooseFrom = BUILDINGS.filter(building => building.pointsNeeded <= this.points)
+        let buildingsForSlots = Random.shuffle(buildingsToChooseFrom)
+            .filter((_, i) => i < this.buildingShop.getNumberOfSlots())
+        this.buildingShop.updateBuildingsToBuy(buildingsForSlots)
     }
 
     private updateStatus(building?: Building) {
@@ -171,7 +173,8 @@ export class Town {
             .map(([index, building]) => building.buildingData.gain)
             .reduce((a, b) => a + b, 0)
 
-        this.pointDisplay.updatePoints(Math.max(entitiesValue, 0))
+        this.points = Math.max(entitiesValue, 0)
+        this.pointDisplay.updatePoints(this.points)
     }
 
     private getTownState() {

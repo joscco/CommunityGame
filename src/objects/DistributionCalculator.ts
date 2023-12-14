@@ -1,4 +1,4 @@
-import {Vector2, vector2Neighbors} from "../general/MathUtils";
+import {transpose, Vector2, vector2Neighbors} from "../general/MathUtils";
 import {BUILDING_NEEDS, BuildingNeed} from "./BuildingData";
 import {Vector2Dict} from "../general/Dict";
 import {To} from "copy-webpack-plugin";
@@ -151,11 +151,7 @@ export class DistributionCalculator {
             maxFlow += pathFlow;
         }
         // Return the overall flow
-        return this.transpose(rGraph);
-    }
-
-    private static transpose(array: number[][]) {
-        return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
+        return transpose(rGraph);
     }
 }
 

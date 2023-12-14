@@ -10,25 +10,23 @@ import Tween = Phaser.Tweens.Tween;
 export class BuildingDictionarySlot {
     container: Container
     buildingImage: Image
-    shown: boolean
     buildingData: BuildingData
 
     nameText: Text
     costText: Text
-    coinIcon: Image
     private scaleTween: Tween;
 
     constructor(scene: MainGameScene, x: number, y: number) {
         this.buildingImage = scene.add.image(0, 0, undefined)
         this.buildingImage.scale = 0.8
 
-        this.costText = scene.add.text(-15, 80, "0", {
+        this.costText = scene.add.text(0, 80, "0", {
             fontSize: 30,
             color: '000',
             align: "right",
             fontFamily: "Londrina"
         })
-        this.costText.setOrigin(1, 0.5)
+        this.costText.setOrigin(0.5)
 
         this.nameText = scene.add.text(0, -80, "0", {
             fontSize: 30,
@@ -38,48 +36,46 @@ export class BuildingDictionarySlot {
         })
         this.nameText.setOrigin(0.5, 0.5)
 
-        this.coinIcon = scene.add.image(-5, 80, 'coin')
-        this.coinIcon.setOrigin(0, 0.5)
-        this.container = scene.add.container(x, y, [this.buildingImage, this.costText, this.nameText, this.coinIcon])
-        this.container.setScale(0, 0)
+        this.container = scene.add.container(x, y, [this.buildingImage, this.costText, this.nameText])
+        this.container.setScale(0)
 
         this.buildingImage.setInteractive()
         this.buildingImage.on("pointerdown", (pointer: Pointer) =>
             this.addNewBuildingAndDrag(scene, pointer))
-
-        this.shown = false
     }
 
-    setBuildingData(buildingData: BuildingData) {
+    setBuildingData(buildingData: BuildingData, delay: number) {
         this.buildingData = buildingData
-        this.buildingImage.setTexture(buildingData.textureName)
-        this.nameText.text = buildingData.name
+
+        this.container.scene.tweens.chain({
+            targets: this.container,
+            tweens: [{
+                scaleX: 0,
+                scaleY: 1,
+                delay: delay,
+                duration: 150,
+                ease: Phaser.Math.Easing.Back.In,
+                onComplete: () => {
+                    this.buildingImage.setTexture(buildingData.textureName)
+                    this.nameText.text = buildingData.displayName
+                    this.updateNumber(buildingData.pointsNeeded)
+                }
+            }, {
+                scaleX: 1,
+                scaleY: 1,
+                duration: 150,
+                ease: Phaser.Math.Easing.Back.Out
+            }]
+        })
+
     }
 
     private addNewBuildingAndDrag(scene: MainGameScene, pointer: Phaser.Input.Pointer) {
-        if (this.shown) {
-            let building = new Building(scene, {x: 0, y: 0}, pointer.x, pointer.y, this.buildingData)
-            scene.dragBuilding(building)
-        }
-    }
-
-    blendIn() {
-        this.tweenScaleTo(1, 300, true)
-    }
-
-    private tweenScaleTo(scale: number, duration: number, shownAfter: boolean) {
-        this.scaleTween?.remove()
-        this.shown = shownAfter
-        this.scaleTween = this.container.scene.tweens.add({
-            targets: this.container,
-            scaleX: scale,
-            scaleY: scale,
-            ease: Phaser.Math.Easing.Quadratic.InOut,
-            duration: duration
-        })
+        let building = new Building(scene, undefined, pointer.x, pointer.y, this.buildingData)
+        scene.dragBuilding(building)
     }
 
     updateNumber(value: number) {
-        this.costText.text = value + ""
+        this.costText.text = "> " + value + " P"
     }
 }
