@@ -15,7 +15,7 @@ export class Arrow extends Container {
         super(scene, position.x + offset.x, position.y + offset.y)
         scene.add.existing(this)
 
-        this.depth = 20
+        this.depth = 1000
         this.scale = 0
 
         this.sprite = this.scene.add.image(0, 0, 'arrow')

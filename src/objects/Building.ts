@@ -1,10 +1,11 @@
 import {BuildingData, BuildingNeed} from "./BuildingData";
 import {MainGameScene} from "../Game";
-import {getFontColorForNeed, NeedIcon} from "./NeedIcon";
+import {getColorForNeed, getFontColorForNeed, NeedIcon} from "./NeedIcon";
 import {Vector2} from "../general/MathUtils";
 import Image = Phaser.GameObjects.Image;
 import Container = Phaser.GameObjects.Container;
 import Text = Phaser.GameObjects.Text;
+import Graphics = Phaser.GameObjects.Graphics;
 
 export class Building extends Container {
 
@@ -13,32 +14,38 @@ export class Building extends Container {
     buildingData: BuildingData
 
     gainText: Text
+    gainBackground: Graphics
     currentGainValue: number
-
     needs: NeedIcon[]
 
-    constructor(scene: MainGameScene, index: Vector2, x: number, y: number, buildingData: BuildingData) {
+    constructor(scene: MainGameScene, x: number, y: number, buildingData: BuildingData) {
         super(scene, x, y)
         scene.add.existing(this)
 
         this.buildingData = buildingData
-        this.index = index
         this.icon = scene.add.image(0, 0, buildingData.textureName)
 
-        this.gainText = scene.add.text(-40, -40, "0", {
+        this.gainBackground = new Graphics(scene)
+        this.gainBackground.fillStyle(getColorForNeed(buildingData.gainType))
+        this.gainBackground.fillCircle(0, 0, 25)
+        this.gainBackground.setPosition(50, -50)
+        this.gainBackground.setScale(0)
+
+        this.gainText = scene.add.text(50, -50, "0", {
             fontSize: 20,
             color: "#" + getFontColorForNeed(buildingData.gainType).toString(16),
             align: "center",
             fontFamily: "Londrina"
         })
         this.gainText.setOrigin(0.5)
+        this.gainText.setScale(0)
 
         this.needs = (buildingData.needs ?? [])
             .map(([need, amount], i) => new NeedIcon(scene, -40 + i * 80, 40, true, need, amount))
 
         this.setGainValue(buildingData.gain)
 
-        this.add([this.icon, this.gainText, ...this.needs])
+        this.add([this.icon, this.gainBackground, this.gainText, ...this.needs])
 
         this.scale = 0
         this.depth = 0
@@ -55,6 +62,7 @@ export class Building extends Container {
 
     tweenMoveTo(index: Vector2, x: number, y: number) {
         this.index = index
+        this.depth = index.y * 100 - index.x
         this.scene.tweens.add({
             targets: this,
             x: x,
@@ -117,7 +125,7 @@ export class Building extends Container {
     }
 
     isMoney() {
-        return this.buildingData.gainType === "money"
+        return this.buildingData.gainType === "points"
     }
 
     private setGainValue(newVal: number) {
@@ -128,12 +136,21 @@ export class Building extends Container {
         }
 
         let newAlpha = this.needsAreMet() ? 1 : 0.5
-        let newScale = this.currentGainValue > 0 ? 1 : 0
+        let newScale = this.needsAreMet() ? (this.currentGainValue > 0 ? 1 : 0) : 0.7
 
         this.scene.tweens.add(
             {
                 targets: this.gainText,
                 alpha: newAlpha,
+                scale: newScale,
+                duration: 200,
+                ease: Phaser.Math.Easing.Quadratic.InOut
+            }
+        )
+
+        this.scene.tweens.add(
+            {
+                targets: this.gainBackground,
                 scale: newScale,
                 duration: 200,
                 ease: Phaser.Math.Easing.Quadratic.InOut

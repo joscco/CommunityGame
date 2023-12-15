@@ -8,7 +8,7 @@ export type BuildingData = {
     needs?: [BuildingNeed, number][]
 }
 
-export const BUILDING_NEEDS = ['nature', 'knowledge', 'water', 'sex', 'food', 'fun', 'community', 'energy', 'money'] as const
+export const BUILDING_NEEDS = ['nature', 'water', 'sex', 'food', 'fun', 'energy', 'points'] as const
 
 export type BuildingNeed = typeof BUILDING_NEEDS[number]
 
@@ -17,7 +17,7 @@ export type BuildingName = 'tent' | 'big_tent' | 'fire' | 'hut' | 'tree' | 'hous
 export const TENT: BuildingData = {
     pointsNeeded: 0,
     gain: 1,
-    gainType: "community",
+    gainType: "points",
     name: 'tent',
     displayName: "Tent",
     textureName: 'buildings/tent',
@@ -34,7 +34,7 @@ export const PINE: BuildingData = {
 export const BIG_TENT: BuildingData = {
     pointsNeeded: 10,
     gain: 2,
-    gainType: "community",
+    gainType: "points",
     name: 'big_tent',
     displayName: "Big Tent",
     textureName: 'buildings/big_tent',
@@ -44,7 +44,7 @@ export const HUT: BuildingData = {
     pointsNeeded: 0,
     name: 'hut',
     gain: 10,
-    gainType: "money",
+    gainType: "points",
     textureName: 'buildings/hut',
     displayName: "Hut",
     needs: [["nature", 1], ["energy", 4]]

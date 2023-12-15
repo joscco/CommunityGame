@@ -71,7 +71,7 @@ export class MainGameScene extends Phaser.Scene {
     dragBuilding(building: Building) {
         this.draggedBuilding = building
         this.dragging = true
-        building.depth = 1
+        building.depth = 2000
     }
 }
 

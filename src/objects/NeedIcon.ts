@@ -6,17 +6,13 @@ import Text = Phaser.GameObjects.Text;
 
 export function getColorForNeed(need: BuildingNeed): number {
     switch (need) {
-        case "community":
-            return 0x5c6a72
         case "nature":
             return 0x285454
         case "food":
             return 0x9e4639
-        case "knowledge":
-            return 0x9e4639
         case "energy":
             return 0xffa315
-        case "money":
+        case "points":
             return 0x000000
     }
     return 0xaa00aa
@@ -24,14 +20,10 @@ export function getColorForNeed(need: BuildingNeed): number {
 
 export function getFontColorForNeed(need: BuildingNeed): number {
     switch (need) {
-        case "community":
-            return 0x000000
         case "food":
             return 0x9e4639
-        case "knowledge":
-            return 0x9e4639
         case "energy":
-        case "money":
+        case "points":
         case "nature":
             return 0xffffff
     }

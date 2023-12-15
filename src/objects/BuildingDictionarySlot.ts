@@ -14,7 +14,6 @@ export class BuildingDictionarySlot {
 
     nameText: Text
     costText: Text
-    private scaleTween: Tween;
 
     constructor(scene: MainGameScene, x: number, y: number) {
         this.buildingImage = scene.add.image(0, 0, undefined)
@@ -71,11 +70,11 @@ export class BuildingDictionarySlot {
     }
 
     private addNewBuildingAndDrag(scene: MainGameScene, pointer: Phaser.Input.Pointer) {
-        let building = new Building(scene, undefined, pointer.x, pointer.y, this.buildingData)
+        let building = new Building(scene, pointer.x, pointer.y, this.buildingData)
         scene.dragBuilding(building)
     }
 
     updateNumber(value: number) {
-        this.costText.text = "> " + value + " P"
+        this.costText.text = "≥ " + value + " P"
     }
 }
